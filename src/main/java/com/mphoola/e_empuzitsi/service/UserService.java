@@ -75,8 +75,9 @@ public class UserService {
     
     /**
      * Map User entity to UserResponse DTO
+     * Public method to be used by other services
      */
-    private UserResponse mapToUserResponse(User user) {
+    public UserResponse mapToUserResponse(User user) {
         // For now, return minimal user response without roles/permissions to avoid lazy loading issues
         Set<String> roles = new HashSet<>();
         Set<String> allPermissions = new HashSet<>();

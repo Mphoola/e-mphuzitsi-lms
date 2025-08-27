@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -91,60 +90,5 @@ public class AuthController {
         UserResponse user = userService.getCurrentUser();
         
         return ResponseEntity.ok(user);
-    }
-    
-    /**
-     * Test endpoint to check if user has STUDENT role
-     * GET /api/auth/student-test
-     * Requires STUDENT role
-     */
-    @GetMapping("/student-test")
-    @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<String> studentTest() {
-        return ResponseEntity.ok("Hello Student! You have access to this endpoint.");
-    }
-    
-    /**
-     * Test endpoint to check if user has TEACHER role
-     * GET /api/auth/teacher-test
-     * Requires TEACHER role
-     */
-    @GetMapping("/teacher-test")
-    @PreAuthorize("hasRole('TEACHER')")
-    public ResponseEntity<String> teacherTest() {
-        return ResponseEntity.ok("Hello Teacher! You have access to this endpoint.");
-    }
-    
-    /**
-     * Test endpoint to check if user has ADMIN role
-     * GET /api/auth/admin-test
-     * Requires ADMIN role
-     */
-    @GetMapping("/admin-test")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> adminTest() {
-        return ResponseEntity.ok("Hello Admin! You have access to this endpoint.");
-    }
-    
-    /**
-     * Test endpoint to check if user has upload_lesson permission
-     * GET /api/auth/upload-test
-     * Requires upload_lesson permission
-     */
-    @GetMapping("/upload-test")
-    @PreAuthorize("hasAuthority('upload_lesson')")
-    public ResponseEntity<String> uploadTest() {
-        return ResponseEntity.ok("You have permission to upload lessons!");
-    }
-    
-    /**
-     * Test endpoint to check if user has create_quiz permission
-     * GET /api/auth/quiz-test
-     * Requires create_quiz permission
-     */
-    @GetMapping("/quiz-test")
-    @PreAuthorize("hasAuthority('create_quiz')")
-    public ResponseEntity<String> quizTest() {
-        return ResponseEntity.ok("You have permission to create quizzes!");
     }
 }
