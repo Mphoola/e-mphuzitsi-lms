@@ -5,17 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_permissions", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "permission_id"})
-})
-@EntityListeners(AuditingEntityListener.class)
+@Table(name = "user_permissions")
+@IdClass(UserPermission.UserPermissionId.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,24 +21,29 @@ import java.time.LocalDateTime;
 public class UserPermission {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    // Foreign Key relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "permission_id", nullable = false)
     private Permission permission;
     
-    // Audit fields
-    @CreatedDate
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
-    @LastModifiedDate
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    
+    // Composite key class
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class UserPermissionId implements Serializable {
+        private Long user;
+        private Long permission;
+    }
 }

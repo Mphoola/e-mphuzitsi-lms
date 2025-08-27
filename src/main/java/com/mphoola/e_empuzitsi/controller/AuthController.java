@@ -1,0 +1,150 @@
+package com.mphoola.e_empuzitsi.controller;
+
+import com.mphoola.e_empuzitsi.dto.AuthResponse;
+import com.mphoola.e_empuzitsi.dto.LoginRequest;
+import com.mphoola.e_empuzitsi.dto.RegisterRequest;
+import com.mphoola.e_empuzitsi.dto.UserResponse;
+import com.mphoola.e_empuzitsi.service.AuthService;
+import com.mphoola.e_empuzitsi.service.UserService;
+import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+    
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+    
+    private final AuthService authService;
+    private final UserService userService;
+    
+    public AuthController(AuthService authService, UserService userService) {
+        this.authService = authService;
+        this.userService = userService;
+    }
+    
+    /**
+     * Register a new user (JSON)
+     * POST /api/auth/register
+     */
+    @PostMapping(value = "/register", consumes = "application/json")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        log.info("Registration JSON request received for email: {}", request.getEmail());
+        
+        AuthResponse response = authService.register(request);
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Register a new user (Form Data)
+     * POST /api/auth/register
+     */
+    @PostMapping(value = "/register", consumes = "application/x-www-form-urlencoded")
+    public ResponseEntity<AuthResponse> registerForm(@Valid @ModelAttribute RegisterRequest request) {
+        log.info("Registration form request received for email: {}", request.getEmail());
+        
+        AuthResponse response = authService.register(request);
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * User login (JSON)
+     * POST /api/auth/login
+     */
+    @PostMapping(value = "/login", consumes = "application/json")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        log.info("Login JSON request received for email: {}", request.getEmail());
+        
+        AuthResponse response = authService.login(request);
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * User login (Form Data)
+     * POST /api/auth/login
+     */
+    @PostMapping(value = "/login", consumes = "application/x-www-form-urlencoded")
+    public ResponseEntity<AuthResponse> loginForm(@Valid @ModelAttribute LoginRequest request) {
+        log.info("Login form request received for email: {}", request.getEmail());
+        
+        AuthResponse response = authService.login(request);
+        
+        return ResponseEntity.ok(response);
+    }
+    
+    /**
+     * Get current user details
+     * GET /api/auth/me
+     * Requires authentication
+     */
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getCurrentUser() {
+        log.debug("Current user details requested");
+        
+        UserResponse user = userService.getCurrentUser();
+        
+        return ResponseEntity.ok(user);
+    }
+    
+    /**
+     * Test endpoint to check if user has STUDENT role
+     * GET /api/auth/student-test
+     * Requires STUDENT role
+     */
+    @GetMapping("/student-test")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<String> studentTest() {
+        return ResponseEntity.ok("Hello Student! You have access to this endpoint.");
+    }
+    
+    /**
+     * Test endpoint to check if user has TEACHER role
+     * GET /api/auth/teacher-test
+     * Requires TEACHER role
+     */
+    @GetMapping("/teacher-test")
+    @PreAuthorize("hasRole('TEACHER')")
+    public ResponseEntity<String> teacherTest() {
+        return ResponseEntity.ok("Hello Teacher! You have access to this endpoint.");
+    }
+    
+    /**
+     * Test endpoint to check if user has ADMIN role
+     * GET /api/auth/admin-test
+     * Requires ADMIN role
+     */
+    @GetMapping("/admin-test")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> adminTest() {
+        return ResponseEntity.ok("Hello Admin! You have access to this endpoint.");
+    }
+    
+    /**
+     * Test endpoint to check if user has upload_lesson permission
+     * GET /api/auth/upload-test
+     * Requires upload_lesson permission
+     */
+    @GetMapping("/upload-test")
+    @PreAuthorize("hasAuthority('upload_lesson')")
+    public ResponseEntity<String> uploadTest() {
+        return ResponseEntity.ok("You have permission to upload lessons!");
+    }
+    
+    /**
+     * Test endpoint to check if user has create_quiz permission
+     * GET /api/auth/quiz-test
+     * Requires create_quiz permission
+     */
+    @GetMapping("/quiz-test")
+    @PreAuthorize("hasAuthority('create_quiz')")
+    public ResponseEntity<String> quizTest() {
+        return ResponseEntity.ok("You have permission to create quizzes!");
+    }
+}
