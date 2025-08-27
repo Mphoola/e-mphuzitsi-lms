@@ -119,10 +119,62 @@ Main Entities:
 
 ## 🧪 Testing
 
-Run tests with:
+### Running Tests
 
 ```bash
+# Run all tests
 ./mvnw test
+
+# Run specific test classes
+./mvnw test -Dtest="**/*EntityTest"
+
+# Run tests with verbose output
+./mvnw test -Dtest="AcademicYearEntityTest"
+```
+
+### Test Coverage
+
+This project includes comprehensive test coverage using **JaCoCo**:
+
+```bash
+# Basic coverage report
+./run-coverage.sh basic
+
+# Coverage with quality gates
+./run-coverage.sh check
+
+# Entity tests only with coverage
+./run-coverage.sh entity
+
+# Open HTML coverage report
+./run-coverage.sh report
+```
+
+**Coverage Report Location:** `target/site/jacoco/index.html`
+
+**Current Test Status:**
+- ✅ **Entity Layer**: 12 test classes with 77+ tests
+- ⚠️ **Service Layer**: Needs expansion
+- ⚠️ **Controller Layer**: Needs expansion
+- ⚠️ **Repository Layer**: Needs expansion
+
+For detailed coverage instructions, see: [COVERAGE.md](./COVERAGE.md)
+
+### Test Structure
+
+```
+src/test/java/com/mphoola/e_empuzitsi/
+│── entity/              # Entity JPA tests (✅ Complete)
+│   │── AcademicYearEntityTest.java
+│   │── UserEntityTest.java
+│   │── SubjectEntityTest.java
+│   │── QuizEntityTest.java
+│   │── PermissionEntityTest.java
+│   │── RoleEntityTest.java
+│   │── ... (12 total entity tests)
+│── service/             # Service layer tests (🚧 TODO)
+│── controller/          # Controller tests (🚧 TODO)
+│── repository/          # Repository tests (🚧 TODO)
 ```
 
 ---

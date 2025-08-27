@@ -25,7 +25,7 @@ public class AcademicYear {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(nullable = false, unique = true)
+    @Column(name = "`year`", nullable = false, unique = true)
     private Integer year;
 
     //is active field
