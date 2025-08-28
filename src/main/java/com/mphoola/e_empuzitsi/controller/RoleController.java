@@ -61,18 +61,10 @@ public class RoleController {
     }
     
     @GetMapping
-    @PreAuthorize("hasAuthority('view_role_details')")
+    @PreAuthorize("hasAuthority('list_roles')")
     @Operation(summary = "Get all roles")
     public ResponseEntity<List<RoleResponse>> getAllRoles() {
         List<RoleResponse> response = roleService.getAllRoles();
-        return ResponseEntity.ok(response);
-    }
-    
-    @GetMapping("/name/{name}")
-    @PreAuthorize("hasAuthority('view_role_details')")
-    @Operation(summary = "Get role by name")
-    public ResponseEntity<RoleResponse> getRoleByName(@PathVariable String name) {
-        RoleResponse response = roleService.getRoleByName(name);
         return ResponseEntity.ok(response);
     }
 }

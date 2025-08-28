@@ -2,14 +2,17 @@ package com.mphoola.e_empuzitsi.config;
 
 import com.mphoola.e_empuzitsi.entity.Permission;
 import com.mphoola.e_empuzitsi.entity.Role;
+import com.mphoola.e_empuzitsi.entity.User;
 import com.mphoola.e_empuzitsi.repository.PermissionRepository;
 import com.mphoola.e_empuzitsi.repository.RoleRepository;
+import com.mphoola.e_empuzitsi.repository.UserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +31,12 @@ class DataInitializerTest {
     @Mock
     private PermissionRepository permissionRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private DataInitializer dataInitializer;
 
@@ -36,24 +45,31 @@ class DataInitializerTest {
     void should_initialize_permissions_when_they_dont_exist() throws Exception {
         // Given
         when(permissionRepository.existsByName(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail("admin@gmail.com")).thenReturn(false);
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded_password");
         
         Permission mockPermission = Permission.builder()
                 .name("upload_lesson")
                 .build();
         when(permissionRepository.save(any(Permission.class))).thenReturn(mockPermission);
+        when(userRepository.save(any(User.class))).thenReturn(new User());
         
         // When
         dataInitializer.run();
         
         // Then
-        verify(permissionRepository, times(13)).existsByName(anyString());
-        verify(permissionRepository, times(13)).save(any(Permission.class));
+        verify(permissionRepository, times(17)).existsByName(anyString());
+        verify(permissionRepository, times(17)).save(any(Permission.class));
         
         // Verify specific permissions are checked
         verify(permissionRepository).existsByName("upload_lesson");
         verify(permissionRepository).existsByName("create_quiz");
         verify(permissionRepository).existsByName("manage_users");
         verify(permissionRepository).existsByName("view_lessons");
+        verify(permissionRepository).existsByName("add_role");
+        verify(permissionRepository).existsByName("update_role");
+        verify(permissionRepository).existsByName("delete_role");
+        verify(permissionRepository).existsByName("view_role_details");
     }
 
     @Test
@@ -61,13 +77,15 @@ class DataInitializerTest {
     void should_not_create_permissions_when_they_exist() throws Exception {
         // Given
         when(permissionRepository.existsByName(anyString())).thenReturn(true);
+        when(userRepository.existsByEmail("admin@gmail.com")).thenReturn(true);
         
         // When
         dataInitializer.run();
         
         // Then
-        verify(permissionRepository, times(13)).existsByName(anyString());
+        verify(permissionRepository, times(17)).existsByName(anyString());
         verify(permissionRepository, never()).save(any(Permission.class));
+        verify(userRepository, never()).save(any(User.class));
     }
 
     @Test
@@ -78,6 +96,7 @@ class DataInitializerTest {
         when(roleRepository.existsByName("STUDENT")).thenReturn(false);
         when(roleRepository.existsByName("TEACHER")).thenReturn(true);
         when(roleRepository.existsByName("ADMIN")).thenReturn(true);
+        when(userRepository.existsByEmail("admin@gmail.com")).thenReturn(true);
         
         // Mock student permissions
         Permission takeQuiz = Permission.builder().name("take_quiz").build();
@@ -114,11 +133,13 @@ class DataInitializerTest {
         when(roleRepository.existsByName("STUDENT")).thenReturn(true);
         when(roleRepository.existsByName("TEACHER")).thenReturn(false);
         when(roleRepository.existsByName("ADMIN")).thenReturn(true);
+        when(userRepository.existsByEmail("admin@gmail.com")).thenReturn(true);
         
-        // Mock teacher permissions
+        // Mock teacher permissions - Updated to 10 permissions including "view_role_details"
         List<String> teacherPermissions = Arrays.asList(
             "upload_lesson", "create_quiz", "grade_quiz", "manage_students",
-            "view_reports", "manage_subjects", "view_lessons", "participate_discussion", "take_quiz"
+            "view_reports", "manage_subjects", "view_lessons", "participate_discussion", 
+            "take_quiz", "view_role_details"
         );
         
         for (String permName : teacherPermissions) {
@@ -135,13 +156,14 @@ class DataInitializerTest {
         // Then
         verify(roleRepository).existsByName("TEACHER");
         verify(roleRepository).save(argThat(role -> 
-            role.getName().equals("TEACHER") && role.getPermissions().size() == 9
+            role.getName().equals("TEACHER") && role.getPermissions().size() == 10
         ));
         
         // Verify some teacher permissions are retrieved
         verify(permissionRepository).findByName("upload_lesson");
         verify(permissionRepository).findByName("create_quiz");
         verify(permissionRepository).findByName("manage_students");
+        verify(permissionRepository).findByName("view_role_details");
     }
 
     @Test
@@ -152,14 +174,27 @@ class DataInitializerTest {
         when(roleRepository.existsByName("STUDENT")).thenReturn(true);
         when(roleRepository.existsByName("TEACHER")).thenReturn(true);
         when(roleRepository.existsByName("ADMIN")).thenReturn(false);
+        when(userRepository.existsByEmail("admin@gmail.com")).thenReturn(true);
         
-        // Mock all permissions for admin
+        // Mock all 17 permissions for admin
         List<Permission> allPermissions = Arrays.asList(
             Permission.builder().name("upload_lesson").build(),
             Permission.builder().name("create_quiz").build(),
+            Permission.builder().name("grade_quiz").build(),
+            Permission.builder().name("manage_students").build(),
+            Permission.builder().name("view_reports").build(),
+            Permission.builder().name("manage_subjects").build(),
             Permission.builder().name("manage_users").build(),
             Permission.builder().name("manage_roles").build(),
-            Permission.builder().name("view_analytics").build()
+            Permission.builder().name("manage_permissions").build(),
+            Permission.builder().name("view_analytics").build(),
+            Permission.builder().name("take_quiz").build(),
+            Permission.builder().name("view_lessons").build(),
+            Permission.builder().name("participate_discussion").build(),
+            Permission.builder().name("add_role").build(),
+            Permission.builder().name("update_role").build(),
+            Permission.builder().name("delete_role").build(),
+            Permission.builder().name("view_role_details").build()
         );
         
         when(permissionRepository.findAll()).thenReturn(allPermissions);
@@ -174,7 +209,7 @@ class DataInitializerTest {
         verify(roleRepository).existsByName("ADMIN");
         verify(permissionRepository).findAll();
         verify(roleRepository).save(argThat(role -> 
-            role.getName().equals("ADMIN") && role.getPermissions().size() == 5
+            role.getName().equals("ADMIN") && role.getPermissions().size() == 17
         ));
     }
 
@@ -184,6 +219,7 @@ class DataInitializerTest {
         // Given
         when(permissionRepository.existsByName(anyString())).thenReturn(true);
         when(roleRepository.existsByName(anyString())).thenReturn(true);
+        when(userRepository.existsByEmail("admin@gmail.com")).thenReturn(true);
         
         // When
         dataInitializer.run();
@@ -203,6 +239,7 @@ class DataInitializerTest {
         when(roleRepository.existsByName("STUDENT")).thenReturn(false);
         when(roleRepository.existsByName("TEACHER")).thenReturn(true);
         when(roleRepository.existsByName("ADMIN")).thenReturn(true);
+        when(userRepository.existsByEmail("admin@gmail.com")).thenReturn(true);
         
         // Mock that some permissions are not found
         when(permissionRepository.findByName("take_quiz")).thenReturn(Optional.empty());
@@ -231,6 +268,8 @@ class DataInitializerTest {
         // Given
         when(permissionRepository.existsByName(anyString())).thenReturn(false);
         when(roleRepository.existsByName(anyString())).thenReturn(false);
+        when(userRepository.existsByEmail("admin@gmail.com")).thenReturn(false);
+        when(passwordEncoder.encode(anyString())).thenReturn("encoded_password");
         
         // Mock permission creation
         when(permissionRepository.save(any(Permission.class))).thenAnswer(invocation -> {
@@ -240,6 +279,9 @@ class DataInitializerTest {
         
         // Mock role creation  
         when(roleRepository.save(any(Role.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        
+        // Mock user creation
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         
         // Mock permission lookups for roles
         when(permissionRepository.findByName(anyString())).thenReturn(Optional.of(
@@ -253,7 +295,8 @@ class DataInitializerTest {
         dataInitializer.run();
         
         // Verify the process completes
-        verify(permissionRepository, times(13)).save(any(Permission.class));
+        verify(permissionRepository, times(17)).save(any(Permission.class));
         verify(roleRepository, times(3)).save(any(Role.class));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 }
