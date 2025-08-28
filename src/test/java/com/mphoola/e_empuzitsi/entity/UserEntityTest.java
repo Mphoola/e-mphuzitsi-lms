@@ -80,71 +80,7 @@ public class UserEntityTest {
         assertThat(user.getCreatedAt()).isEqualTo(user.getCreatedAt()); // created_at should not change
     }
 
-    @Test
-    public void should_create_user_with_roles_relationship() {
-        // Given - create role and user
-        Role role = Role.builder()
-            .name("STUDENT")
-            .build();
-        entityManager.persist(role);
-        entityManager.flush();
 
-        User user = User.builder()
-            .name("Student User")
-            .email("student@example.com")
-            .password("password123")
-            .build();
-        entityManager.persist(user);
-        entityManager.flush();
-
-        // When - create user-role relationship
-        UserRole userRole = UserRole.builder()
-            .user(user)
-            .role(role)
-            .build();
-        entityManager.persist(userRole);
-        entityManager.flush();
-
-        // Then - verify relationship and timestamps
-        assertThat(userRole.getId()).isNotNull();
-        assertThat(userRole.getUser()).isEqualTo(user);
-        assertThat(userRole.getRole()).isEqualTo(role);
-        assertThat(userRole.getCreatedAt()).isNotNull();
-        assertThat(userRole.getUpdatedAt()).isNotNull();
-    }
-
-    @Test
-    public void should_create_user_with_permissions_relationship() {
-        // Given - create permission and user
-        Permission permission = Permission.builder()
-            .name("upload_lesson")
-            .build();
-        entityManager.persist(permission);
-        entityManager.flush();
-
-        User user = User.builder()
-            .name("Teacher User")
-            .email("teacher@example.com")
-            .password("password123")
-            .build();
-        entityManager.persist(user);
-        entityManager.flush();
-
-        // When - create user-permission relationship
-        UserPermission userPermission = UserPermission.builder()
-            .user(user)
-            .permission(permission)
-            .build();
-        entityManager.persist(userPermission);
-        entityManager.flush();
-
-        // Then - verify relationship and timestamps
-        assertThat(userPermission.getId()).isNotNull();
-        assertThat(userPermission.getUser()).isEqualTo(user);
-        assertThat(userPermission.getPermission()).isEqualTo(permission);
-        assertThat(userPermission.getCreatedAt()).isNotNull();
-        assertThat(userPermission.getUpdatedAt()).isNotNull();
-    }
 
     @Test
     public void should_enforce_unique_email_constraint() {

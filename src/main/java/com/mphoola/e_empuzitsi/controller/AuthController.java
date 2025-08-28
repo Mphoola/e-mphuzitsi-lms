@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api/auth", consumes = "application/json", produces = "application/json")
+@RequestMapping(value = "/api/auth", produces = "application/json")
 @Tag(name = "🔐 Authentication", description = "Authentication and user management endpoints")
 public class AuthController {
     
@@ -31,14 +31,14 @@ public class AuthController {
     }
     
     @Operation(summary = "Register New User")
-    @PostMapping("/register")
+    @PostMapping(value = "/register", consumes = "application/json")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {        
         AuthResponse response = authService.register(request);
         return ResponseEntity.ok(response);
     }
     
     @Operation(summary = "User Login")
-    @PostMapping("/login")
+    @PostMapping(value = "/login", consumes = "application/json")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {        
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(response);
@@ -52,7 +52,7 @@ public class AuthController {
     }
     
     @Operation(summary = "Forgot Password")
-    @PostMapping("/forgot-password")
+    @PostMapping(value = "/forgot-password", consumes = "application/json")
     public ResponseEntity<MessageResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         userService.forgotPassword(request.getEmail());
         return ResponseEntity.ok(MessageResponse.builder()
@@ -61,7 +61,7 @@ public class AuthController {
     }
     
     @Operation(summary = "Reset Password")
-    @PostMapping("/reset-password")
+    @PostMapping(value = "/reset-password", consumes = "application/json")
     public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         userService.resetPassword(request.getToken(), request.getNewPassword());
         return ResponseEntity.ok(MessageResponse.builder()
