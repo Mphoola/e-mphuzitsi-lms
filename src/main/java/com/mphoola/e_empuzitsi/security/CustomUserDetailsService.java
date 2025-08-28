@@ -6,8 +6,6 @@ import com.mphoola.e_empuzitsi.entity.User;
 import com.mphoola.e_empuzitsi.entity.UserPermission;
 import com.mphoola.e_empuzitsi.entity.UserRole;
 import com.mphoola.e_empuzitsi.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,8 +22,6 @@ import java.util.Set;
 @Transactional
 public class CustomUserDetailsService implements UserDetailsService {
     
-    private static final Logger log = LoggerFactory.getLogger(CustomUserDetailsService.class);
-    
     private final UserRepository userRepository;
     
     public CustomUserDetailsService(UserRepository userRepository) {
@@ -34,18 +30,14 @@ public class CustomUserDetailsService implements UserDetailsService {
     
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        log.debug("Loading user by email: {}", email);
-        
         try {
             // Temporarily use simple query to debug
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
             
-            log.debug("Found user: {} with ID: {}", user.getEmail(), user.getId());
             return UserPrincipal.create(user, getAuthorities(user));
             
         } catch (Exception e) {
-            log.error("Error loading user by email {}: {}", email, e.getMessage(), e);
             throw new UsernameNotFoundException("User not found with email: " + email);
         }
     }
@@ -54,8 +46,6 @@ public class CustomUserDetailsService implements UserDetailsService {
      * Load user by ID for JWT authentication
      */
     public UserDetails loadUserById(Long id) {
-        log.debug("Loading user by ID: {}", id);
-        
         // Temporarily use simple query to debug
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
@@ -100,13 +90,10 @@ public class CustomUserDetailsService implements UserDetailsService {
                 }
             }
         } catch (Exception e) {
-            log.warn("Error loading authorities for user {}: {}. Using empty authorities.", 
-                     user.getEmail(), e.getMessage());
             // Return basic user authority if role/permission loading fails
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         }
         
-        log.debug("User {} has authorities: {}", user.getEmail(), authorities);
         return authorities;
     }
 }

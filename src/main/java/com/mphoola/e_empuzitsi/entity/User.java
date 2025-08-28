@@ -34,6 +34,13 @@ public class User {
     @Column(nullable = false)
     private String password;
     
+    // Password reset fields
+    @Column(name = "reset_token")
+    private String resetToken;
+    
+    @Column(name = "reset_token_expires_at")
+    private LocalDateTime resetTokenExpiresAt;
+    
     // Relationships
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<StudentSubject> studentSubjects;

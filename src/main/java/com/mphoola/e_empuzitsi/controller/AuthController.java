@@ -4,19 +4,23 @@ import com.mphoola.e_empuzitsi.dto.AuthResponse;
 import com.mphoola.e_empuzitsi.dto.LoginRequest;
 import com.mphoola.e_empuzitsi.dto.RegisterRequest;
 import com.mphoola.e_empuzitsi.dto.UserResponse;
+import com.mphoola.e_empuzitsi.dto.ForgotPasswordRequest;
+import com.mphoola.e_empuzitsi.dto.ResetPasswordRequest;
+import com.mphoola.e_empuzitsi.dto.MessageResponse;
 import com.mphoola.e_empuzitsi.service.AuthService;
 import com.mphoola.e_empuzitsi.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(value = "/api/auth", consumes = "application/json", produces = "application/json")
+@Tag(name = "🔐 Authentication", description = "Authentication and user management endpoints")
 public class AuthController {
-    
-    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
     
     private final AuthService authService;
     private final UserService userService;
@@ -26,69 +30,42 @@ public class AuthController {
         this.userService = userService;
     }
     
-    /**
-     * Register a new user (JSON)
-     * POST /api/auth/register
-     */
-    @PostMapping(value = "/register", consumes = "application/json")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        log.info("Registration JSON request received for email: {}", request.getEmail());
-        
+    @Operation(summary = "Register New User")
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {        
         AuthResponse response = authService.register(request);
-        
         return ResponseEntity.ok(response);
     }
     
-    /**
-     * Register a new user (Form Data)
-     * POST /api/auth/register
-     */
-    @PostMapping(value = "/register", consumes = "application/x-www-form-urlencoded")
-    public ResponseEntity<AuthResponse> registerForm(@Valid @ModelAttribute RegisterRequest request) {
-        log.info("Registration form request received for email: {}", request.getEmail());
-        
-        AuthResponse response = authService.register(request);
-        
-        return ResponseEntity.ok(response);
-    }
-    
-    /**
-     * User login (JSON)
-     * POST /api/auth/login
-     */
-    @PostMapping(value = "/login", consumes = "application/json")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        log.info("Login JSON request received for email: {}", request.getEmail());
-        
+    @Operation(summary = "User Login")
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {        
         AuthResponse response = authService.login(request);
-        
         return ResponseEntity.ok(response);
     }
     
-    /**
-     * User login (Form Data)
-     * POST /api/auth/login
-     */
-    @PostMapping(value = "/login", consumes = "application/x-www-form-urlencoded")
-    public ResponseEntity<AuthResponse> loginForm(@Valid @ModelAttribute LoginRequest request) {
-        log.info("Login form request received for email: {}", request.getEmail());
-        
-        AuthResponse response = authService.login(request);
-        
-        return ResponseEntity.ok(response);
-    }
-    
-    /**
-     * Get current user details
-     * GET /api/auth/me
-     * Requires authentication
-     */
+    @Operation(summary = "Get Current User Profile")
     @GetMapping("/me")
     public ResponseEntity<UserResponse> getCurrentUser() {
-        log.debug("Current user details requested");
-        
         UserResponse user = userService.getCurrentUser();
-        
         return ResponseEntity.ok(user);
+    }
+    
+    @Operation(summary = "Forgot Password")
+    @PostMapping("/forgot-password")
+    public ResponseEntity<MessageResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        userService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok(MessageResponse.builder()
+                .message("If your email exists in our system, you will receive a password reset link shortly.")
+                .build());
+    }
+    
+    @Operation(summary = "Reset Password")
+    @PostMapping("/reset-password")
+    public ResponseEntity<MessageResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        userService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok(MessageResponse.builder()
+                .message("Password has been reset successfully. You can now login with your new password.")
+                .build());
     }
 }

@@ -1,8 +1,6 @@
-
-
 # 📚 E-Learning Platform Database Design (Secondary School LMS)
 
-This document describes the database structure for the platform.
+This document describes the database structure for the E-Empuzitsi Learning Management System platform for Malawi Secondary Schools.
 
 ---
 
@@ -12,6 +10,8 @@ This document describes the database structure for the platform.
 * **name**
 * **email** (unique)
 * **password**
+* **reset_token** (nullable)
+* **reset_token_expires_at** (nullable)
 
 ### Relationships
 
@@ -38,75 +38,77 @@ This document describes the database structure for the platform.
 ## 3. Permissions
 
 * **id** (PK)
-* **name** (unique, e.g. upload\_lesson, grade\_quiz, manage\_users)
+* **name** (unique, e.g. upload_lesson, manage_users, take_quiz)
 
 ### Relationships
 
-* A `Permission` can belong to many `Roles` (via **RolePermissions**).
-* A `Permission` can also be granted directly to `Users` (via **UserPermissions**).
+* A `Permission` can be assigned to many `Roles` (via **RolePermissions**).
+* A `Permission` can be directly assigned to `Users` (via **UserPermissions**).
 
 ---
 
 ## 4. UserRoles (Join Table)
 
-* **user\_id** (FK → Users)
-* **role\_id** (FK → Roles)
-  **PK** → (user\_id, role\_id)
+* **user_id** (PK, FK → Users)
+* **role_id** (PK, FK → Roles)
+
+Composite primary key linking users to their roles.
 
 ---
 
 ## 5. RolePermissions (Join Table)
 
-* **role\_id** (FK → Roles)
-* **permission\_id** (FK → Permissions)
-  **PK** → (role\_id, permission\_id)
+* **role_id** (PK, FK → Roles)
+* **permission_id** (PK, FK → Permissions)
+
+Composite primary key linking roles to their permissions.
 
 ---
 
 ## 6. UserPermissions (Join Table)
 
-* **user\_id** (FK → Users)
-* **permission\_id** (FK → Permissions)
-  **PK** → (user\_id, permission\_id)
+* **id** (PK)
+* **user_id** (FK → Users)
+* **permission_id** (FK → Permissions)
+
+Direct permission assignments to users (beyond role-based permissions).
 
 ---
 
 ## 7. AcademicYears
 
 * **id** (PK)
-* **year** (e.g. 2025)
+* **year** (e.g., 2024, 2025)
+* **is_active** (boolean - current active year)
 
 ### Relationships
 
-* Linked to `StudentSubjects`
-* Linked to `QuizAttempts`
-* Linked to `Discussions`
+* An `AcademicYear` can have many `StudentSubjects`.
+* An `AcademicYear` can have many `QuizAttempts`.
 
 ---
 
 ## 8. Subjects
 
 * **id** (PK)
-* **name**
+* **name** (e.g. Mathematics, Physics, Biology)
 
 ### Relationships
 
-* A `Subject` has many `LessonComponents`.
-* A `Subject` has many `StudentSubjects`.
-* A `Subject` has many `Discussions`.
+* A `Subject` can have many `LessonComponents`.
+* A `Subject` can be enrolled by many `Users` (via **StudentSubjects**).
+* A `Subject` can have many `Discussions`.
 
 ---
 
 ## 9. StudentSubjects (Join Table)
 
 * **id** (PK)
-* **student\_id** (FK → Users)
-* **subject\_id** (FK → Subjects)
-* **academic\_year\_id** (FK → AcademicYears)
+* **student_id** (FK → Users)
+* **subject_id** (FK → Subjects)
+* **academic_year_id** (FK → AcademicYears)
 
-### Purpose
-
-Tracks which subject a student is taking in a given academic year.
+Links students to subjects for specific academic years.
 
 ---
 
@@ -114,22 +116,27 @@ Tracks which subject a student is taking in a given academic year.
 
 * **id** (PK)
 * **title**
-* **type** (VIDEO, PDF, QUIZ)
-* **subject\_id** (FK → Subjects)
+* **type** (ENUM: VIDEO, DOCUMENT, QUIZ, ASSIGNMENT)
+* **subject_id** (FK → Subjects)
 
 ### Relationships
 
+* A `LessonComponent` belongs to one `Subject`.
 * A `LessonComponent` can have many `CourseContents`.
-* A `LessonComponent` can link to a `Quiz`.
+* A `LessonComponent` can have one `Quiz` (if type is QUIZ).
 
 ---
 
 ## 11. CourseContents
 
 * **id** (PK)
-* **file\_url**
+* **file_url**
 * **description**
-* **lesson\_component\_id** (FK → LessonComponents)
+* **lesson_component_id** (FK → LessonComponents)
+
+### Relationships
+
+* A `CourseContent` belongs to one `LessonComponent`.
 
 ---
 
@@ -137,69 +144,83 @@ Tracks which subject a student is taking in a given academic year.
 
 * **id** (PK)
 * **title**
-* **lesson\_component\_id** (FK → LessonComponents)
+* **lesson_component_id** (FK → LessonComponents, unique)
 
 ### Relationships
 
-* A `Quiz` has many `QuizQuestions`.
-* A `Quiz` can be attempted by many `Students`.
+* A `Quiz` belongs to one `LessonComponent` (one-to-one).
+* A `Quiz` can have many `QuizQuestions`.
+* A `Quiz` can have many `QuizAttempts`.
 
 ---
 
 ## 13. QuizQuestions
 
 * **id** (PK)
-* **question\_text**
-* **quiz\_id** (FK → Quizzes)
+* **question_text**
+* **question_type** (ENUM: MULTIPLE_CHOICE, TRUE_FALSE, SHORT_ANSWER)
+* **quiz_id** (FK → Quizzes)
 
 ### Relationships
 
-* A `QuizQuestion` has many `QuizOptions`.
+* A `QuizQuestion` belongs to one `Quiz`.
+* A `QuizQuestion` can have many `QuizOptions` (for multiple choice).
+* A `QuizQuestion` can have many `QuizResponses`.
 
 ---
 
 ## 14. QuizOptions
 
 * **id** (PK)
-* **option\_text**
-* **is\_correct** (boolean)
-* **question\_id** (FK → QuizQuestions)
+* **option_text**
+* **is_correct** (boolean)
+* **quiz_question_id** (FK → QuizQuestions)
+
+### Relationships
+
+* A `QuizOption` belongs to one `QuizQuestion`.
 
 ---
 
 ## 15. QuizAttempts
 
 * **id** (PK)
-* **student\_id** (FK → Users)
-* **quiz\_id** (FK → Quizzes)
-* **academic\_year\_id** (FK → AcademicYears)
-* **score**
+* **quiz_id** (FK → Quizzes)
+* **student_id** (FK → Users)
+* **academic_year_id** (FK → AcademicYears)
+* **score** (integer, percentage)
 
 ### Relationships
 
-* A `QuizAttempt` has many `QuizResponses`.
+* A `QuizAttempt` belongs to one `Quiz` and one `User` (student).
+* A `QuizAttempt` can have many `QuizResponses`.
 
 ---
 
 ## 16. QuizResponses
 
 * **id** (PK)
-* **attempt\_id** (FK → QuizAttempts)
-* **question\_id** (FK → QuizQuestions)
-* **chosen\_option\_id** (FK → QuizOptions)
+* **quiz_question_id** (FK → QuizQuestions)
+* **quiz_attempt_id** (FK → QuizAttempts)
+* **selected_option_id** (FK → QuizOptions, nullable)
+* **answer_text** (nullable, for short answers)
+
+### Relationships
+
+* A `QuizResponse` belongs to one `QuizQuestion` and one `QuizAttempt`.
 
 ---
 
 ## 17. Discussions
 
 * **id** (PK)
-* **topic**
-* **subject\_id** (FK → Subjects)
-* **academic\_year\_id** (FK → AcademicYears)
+* **title**
+* **subject_id** (FK → Subjects)
 
 ### Relationships
 
-* A `Discussion` has many `DiscussionPosts`.
+* A `Discussion` belongs to one `Subject`.
+* A `Discussion` can have many `DiscussionPosts`.
 
 ---
 
@@ -207,19 +228,87 @@ Tracks which subject a student is taking in a given academic year.
 
 * **id** (PK)
 * **content**
-* **discussion\_id** (FK → Discussions)
-* **author\_id** (FK → Users)
+* **discussion_id** (FK → Discussions)
+* **author_id** (FK → Users)
+* **parent_post_id** (FK → DiscussionPosts, nullable for replies)
+
+### Relationships
+
+* A `DiscussionPost` belongs to one `Discussion` and one `User` (author).
+* A `DiscussionPost` can have many child `DiscussionPosts` (replies).
 
 ---
 
 # 🔗 Summary of Key Relationships
 
-* **User ↔ Subject** → via `StudentSubjects`
-* **User ↔ Role ↔ Permission** → via `UserRoles`, `RolePermissions`, `UserPermissions`
-* **Subject ↔ LessonComponent**
-* **LessonComponent ↔ CourseContent / Quiz**
-* **Quiz ↔ QuizQuestion ↔ QuizOption**
-* **User ↔ QuizAttempt ↔ QuizResponse**
-* **Subject ↔ Discussion ↔ DiscussionPost**
-* **AcademicYear** ties everything to a specific school year
+## Authentication & Authorization
+- **Users** ↔ **Roles** (many-to-many via UserRoles)
+- **Roles** ↔ **Permissions** (many-to-many via RolePermissions)  
+- **Users** ↔ **Permissions** (many-to-many via UserPermissions)
 
+## Academic Structure
+- **Users** (students) ↔ **Subjects** (many-to-many via StudentSubjects)
+- **Subjects** → **LessonComponents** (one-to-many)
+- **LessonComponents** → **CourseContents** (one-to-many)
+- **LessonComponents** → **Quiz** (one-to-one, when type=QUIZ)
+
+## Assessment System  
+- **Quiz** → **QuizQuestions** (one-to-many)
+- **QuizQuestions** → **QuizOptions** (one-to-many)
+- **Users** (students) → **QuizAttempts** (one-to-many)
+- **QuizAttempts** → **QuizResponses** (one-to-many)
+
+## Discussion System
+- **Subjects** → **Discussions** (one-to-many)
+- **Discussions** → **DiscussionPosts** (one-to-many)
+- **Users** → **DiscussionPosts** (one-to-many as authors)
+- **DiscussionPosts** → **DiscussionPosts** (self-referencing for replies)
+
+---
+
+# 🎯 Usage Examples
+
+## Typical Queries
+
+**Get all subjects for a student in current academic year:**
+```sql
+SELECT s.* FROM subjects s
+JOIN student_subjects ss ON s.id = ss.subject_id
+WHERE ss.student_id = ? AND ss.academic_year_id = ?
+```
+
+**Get all permissions for a user (via roles + direct):**
+```sql
+-- Via roles
+SELECT DISTINCT p.* FROM permissions p
+JOIN role_permissions rp ON p.id = rp.permission_id
+JOIN roles r ON rp.role_id = r.id
+JOIN user_roles ur ON r.id = ur.role_id
+WHERE ur.user_id = ?
+
+UNION
+
+-- Direct permissions
+SELECT p.* FROM permissions p
+JOIN user_permissions up ON p.id = up.permission_id
+WHERE up.user_id = ?
+```
+
+**Get quiz results for a student:**
+```sql
+SELECT q.title, qa.score, qa.created_at
+FROM quiz_attempts qa
+JOIN quizzes q ON qa.quiz_id = q.id
+WHERE qa.student_id = ?
+ORDER BY qa.created_at DESC
+```
+
+This comprehensive schema supports:
+- ✅ Multi-role authentication system
+- ✅ Academic year management
+- ✅ Subject enrollment and content delivery
+- ✅ Quiz system with multiple question types
+- ✅ Discussion forums per subject
+- ✅ Progress tracking and reporting
+- ✅ Password reset functionality
+- ✅ Audit trails with timestamps

@@ -3,34 +3,37 @@ package com.mphoola.e_empuzitsi.service;
 import com.mphoola.e_empuzitsi.dto.UserResponse;
 import com.mphoola.e_empuzitsi.entity.*;
 import com.mphoola.e_empuzitsi.exception.ResourceNotFoundException;
+import com.mphoola.e_empuzitsi.exception.BadCredentialsException;
 import com.mphoola.e_empuzitsi.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.UUID;
 
 @Service
 @Transactional
 public class UserService {
     
-    private static final Logger log = LoggerFactory.getLogger(UserService.class);
-    
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
     
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
     
     /**
      * Get user by ID with roles and permissions
      */
     public UserResponse getUserById(Long id) {
-        log.debug("Fetching user by ID: {}", id);
         
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -41,9 +44,7 @@ public class UserService {
     /**
      * Get user by email with roles and permissions
      */
-    public UserResponse getUserByEmail(String email) {
-        log.debug("Fetching user by email: {}", email);
-        
+    public UserResponse getUserByEmail(String email) {        
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
         
@@ -61,7 +62,6 @@ public class UserService {
         }
         
         String email = authentication.getName();
-        log.debug("Getting current user with email: {}", email);
         
         return getUserByEmail(email);
     }
@@ -71,6 +71,48 @@ public class UserService {
      */
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+    
+    /**
+     * Generate and send password reset token
+     */
+    public void forgotPassword(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        
+        // Generate reset token
+        String resetToken = UUID.randomUUID().toString();
+        
+        // Set token and expiry (24 hours from now)
+        user.setResetToken(resetToken);
+        user.setResetTokenExpiresAt(LocalDateTime.now().plusHours(24));
+        
+        userRepository.save(user);
+        
+        // Send email with reset token
+        emailService.sendPasswordResetEmail(email, resetToken);
+    }
+    
+    /**
+     * Reset password using token
+     */
+    public void resetPassword(String token, String newPassword) {
+        User user = userRepository.findByResetToken(token)
+                .orElseThrow(() -> new BadCredentialsException("Invalid or expired reset token"));
+        
+        // Check if token is expired
+        if (user.getResetTokenExpiresAt() == null || user.getResetTokenExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BadCredentialsException("Reset token has expired");
+        }
+        
+        // Update password
+        user.setPassword(passwordEncoder.encode(newPassword));
+        
+        // Clear reset token
+        user.setResetToken(null);
+        user.setResetTokenExpiresAt(null);
+        
+        userRepository.save(user);
     }
     
     /**
@@ -110,7 +152,6 @@ public class UserService {
                 }
             }
         } catch (Exception e) {
-            log.warn("Error loading roles/permissions for user {}: {}", user.getEmail(), e.getMessage());
             // Return empty collections if there's an issue
         }
         

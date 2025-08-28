@@ -13,8 +13,6 @@ import com.mphoola.e_empuzitsi.repository.RoleRepository;
 import com.mphoola.e_empuzitsi.repository.UserRepository;
 import com.mphoola.e_empuzitsi.repository.UserRoleRepository;
 import com.mphoola.e_empuzitsi.util.JwtUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,8 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class AuthService {
-    
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -57,8 +53,6 @@ public class AuthService {
      * Register a new user
      */
     public AuthResponse register(RegisterRequest request) {
-        log.info("Attempting to register user with email: {}", request.getEmail());
-        
         // Check if user already exists
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ResourceConflictException("User already exists with email: " + request.getEmail());
@@ -73,7 +67,6 @@ public class AuthService {
         
         // Save user
         User savedUser = userRepository.save(user);
-        log.info("Successfully created user with ID: {}", savedUser.getId());
         
         // Assign default STUDENT role
         assignDefaultRole(savedUser);
@@ -83,8 +76,6 @@ public class AuthService {
         
         // Get user response with roles and permissions using UserService
         UserResponse userResponse = userService.mapToUserResponse(savedUser);
-        
-        log.info("Successfully registered and authenticated user: {}", savedUser.getEmail());
         
         return AuthResponse.builder()
                 .token(token)
@@ -96,8 +87,6 @@ public class AuthService {
      * Authenticate user and generate JWT token
      */
     public AuthResponse login(LoginRequest request) {
-        log.info("Attempting to login user with email: {}", request.getEmail());
-        
         try {
             // Authenticate user
             Authentication authentication = authenticationManager.authenticate(
@@ -115,15 +104,12 @@ public class AuthService {
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
             UserResponse userResponse = userService.mapToUserResponse(user);
             
-            log.info("Successfully authenticated user: {}", request.getEmail());
-            
             return AuthResponse.builder()
                     .token(token)
                     .user(userResponse)
                     .build();
                     
         } catch (AuthenticationException e) {
-            log.warn("Authentication failed for user: {} - {}", request.getEmail(), e.getMessage());
             throw new com.mphoola.e_empuzitsi.exception.BadCredentialsException("Invalid email or password");
         }
     }
@@ -141,6 +127,5 @@ public class AuthService {
                 .build();
         
         userRoleRepository.save(userRole);
-        log.debug("Assigned STUDENT role to user: {}", user.getEmail());
     }
 }
