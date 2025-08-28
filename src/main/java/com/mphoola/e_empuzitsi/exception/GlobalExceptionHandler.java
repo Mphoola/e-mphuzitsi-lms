@@ -260,6 +260,26 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * Handle role in use errors
+     */
+    @ExceptionHandler(RoleInUseException.class)
+    public ResponseEntity<ErrorResponse> handleRoleInUseException(
+            RoleInUseException ex, 
+            HttpServletRequest request) {
+        
+        log.warn("Role in use for path: {} - {}", request.getRequestURI(), ex.getMessage());
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .status(HttpStatus.CONFLICT.value())
+                .error("Conflict")
+                .path(request.getRequestURI())
+                .build();
+        
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+    
+    /**
      * Handle general runtime errors
      */
     @ExceptionHandler(RuntimeException.class)

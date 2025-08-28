@@ -19,4 +19,14 @@ public interface RoleRepository extends JpaRepository<Role, Long> {
            "LEFT JOIN FETCH r.permissions " +
            "WHERE r.name = :name")
     Optional<Role> findByNameWithPermissions(@Param("name") String name);
+    
+    @Query("SELECT DISTINCT r FROM Role r " +
+           "LEFT JOIN FETCH r.permissions " +
+           "WHERE r.id = :id")
+    Optional<Role> findByIdWithPermissions(@Param("id") Long id);
+    
+    @Query("SELECT COUNT(ur) FROM UserRole ur WHERE ur.role.id = :roleId")
+    long countUsersByRoleId(@Param("roleId") Long roleId);
+    
+    boolean existsByNameAndIdNot(String name, Long id);
 }

@@ -2,11 +2,14 @@ package com.mphoola.e_empuzitsi.config;
 
 import com.mphoola.e_empuzitsi.entity.Permission;
 import com.mphoola.e_empuzitsi.entity.Role;
+import com.mphoola.e_empuzitsi.entity.User;
 import com.mphoola.e_empuzitsi.repository.PermissionRepository;
 import com.mphoola.e_empuzitsi.repository.RoleRepository;
+import com.mphoola.e_empuzitsi.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,15 +21,19 @@ import java.util.Set;
 @Component
 @Transactional
 public class DataInitializer implements CommandLineRunner {
-    
-    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
-    
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
     
-    public DataInitializer(RoleRepository roleRepository, PermissionRepository permissionRepository) {
+    public DataInitializer(RoleRepository roleRepository, PermissionRepository permissionRepository,
+                          UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
     
     @Override
@@ -38,10 +45,30 @@ public class DataInitializer implements CommandLineRunner {
         
         // Initialize roles
         initializeRoles();
-        
+
+        //create a default admin user
+        createDefaultAdminUser();
+
         log.info("Data initialization completed successfully!");
     }
     
+    private void createDefaultAdminUser() {
+        String adminEmail = "admin@gmail.com";
+        String adminPassword = "123456789";
+
+        // Check if the admin user already exists
+        if (!userRepository.existsByEmail(adminEmail)) {
+            User adminUser = User.builder()
+                    .name("Admin User")
+                    .email(adminEmail)
+                    .password(passwordEncoder.encode(adminPassword))
+                    .build();
+
+            userRepository.save(adminUser);
+            log.info("Created default admin user: {}", adminEmail);
+        }
+    }
+
     private void initializePermissions() {
         List<String> permissionNames = Arrays.asList(
             "upload_lesson",
@@ -56,7 +83,11 @@ public class DataInitializer implements CommandLineRunner {
             "view_analytics",
             "take_quiz",
             "view_lessons",
-            "participate_discussion"
+            "participate_discussion",
+            "add_role",
+            "update_role",
+            "delete_role",
+            "view_role_details"
         );
         
         for (String permissionName : permissionNames) {
@@ -122,7 +153,8 @@ public class DataInitializer implements CommandLineRunner {
                 "manage_subjects",
                 "view_lessons",
                 "participate_discussion",
-                "take_quiz"
+                "take_quiz",
+                "view_role_details"
             );
             
             for (String permissionName : teacherPermissionNames) {
