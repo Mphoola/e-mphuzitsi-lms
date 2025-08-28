@@ -3,6 +3,7 @@ package com.mphoola.e_empuzitsi.config;
 import com.mphoola.e_empuzitsi.entity.Permission;
 import com.mphoola.e_empuzitsi.entity.Role;
 import com.mphoola.e_empuzitsi.entity.User;
+import com.mphoola.e_empuzitsi.entity.UserRole;
 import com.mphoola.e_empuzitsi.repository.PermissionRepository;
 import com.mphoola.e_empuzitsi.repository.RoleRepository;
 import com.mphoola.e_empuzitsi.repository.UserRepository;
@@ -16,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Component
 @Transactional
@@ -40,13 +40,13 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("Initializing default roles and permissions...");
         
-        // Initialize permissions
+        // Initialize permissions first
         initializePermissions();
         
-        // Initialize roles
+        // Initialize roles second (depends on permissions)
         initializeRoles();
 
-        //create a default admin user
+        // Create default admin user last (depends on roles)
         createDefaultAdminUser();
 
         log.info("Data initialization completed successfully!");
@@ -56,38 +56,63 @@ public class DataInitializer implements CommandLineRunner {
         String adminEmail = "admin@gmail.com";
         String adminPassword = "123456789";
 
+        User adminUser;
+
         // Check if the admin user already exists
         if (!userRepository.existsByEmail(adminEmail)) {
-            User adminUser = User.builder()
+            adminUser = User.builder()
                     .name("Admin User")
                     .email(adminEmail)
                     .password(passwordEncoder.encode(adminPassword))
                     .build();
 
+            // Save the user first to get the ID
+            adminUser = userRepository.save(adminUser);
+            log.info("Created new admin user: {}", adminEmail);
+        } else {
+            // Get existing admin user
+            adminUser = userRepository.findByEmail(adminEmail)
+                    .orElseThrow(() -> new RuntimeException("Admin user not found"));
+            log.info("Found existing admin user: {}", adminEmail);
+        }
+
+        // Get the ADMIN role
+        Role adminRole = roleRepository.findByName("ADMIN")
+                .orElseThrow(() -> new RuntimeException("ADMIN role not found"));
+
+        // Check if user already has ADMIN role
+        boolean hasAdminRole = adminUser.getUserRoles() != null && 
+                adminUser.getUserRoles().stream()
+                    .anyMatch(ur -> ur.getRole().getName().equals("ADMIN"));
+
+        if (!hasAdminRole) {
+            // Create UserRole association
+            UserRole userRole = UserRole.builder()
+                    .user(adminUser)
+                    .role(adminRole)
+                    .build();
+
+            // Initialize userRoles collection if it's null
+            if (adminUser.getUserRoles() == null) {
+                adminUser.setUserRoles(new HashSet<>());
+            }
+            adminUser.getUserRoles().add(userRole);
+
+            // Save the updated user with roles
             userRepository.save(adminUser);
-            log.info("Created default admin user: {}", adminEmail);
+            log.info("Assigned ADMIN role to user: {}", adminEmail);
+        } else {
+            log.info("Admin user {} already has ADMIN role", adminEmail);
         }
     }
 
     private void initializePermissions() {
         List<String> permissionNames = Arrays.asList(
-            "upload_lesson",
-            "create_quiz",
-            "grade_quiz",
-            "manage_students",
-            "view_reports",
-            "manage_subjects",
-            "manage_users",
-            "manage_roles",
-            "manage_permissions",
-            "view_analytics",
-            "take_quiz",
-            "view_lessons",
-            "participate_discussion",
             "add_role",
             "update_role",
             "delete_role",
-            "view_role_details"
+            "show_role_details",
+            "list_roles"
         );
         
         for (String permissionName : permissionNames) {
@@ -114,79 +139,54 @@ public class DataInitializer implements CommandLineRunner {
     }
     
     private void initializeStudentRole() {
-        if (!roleRepository.existsByName("STUDENT")) {
-            Set<Permission> studentPermissions = new HashSet<>();
-            
-            // Student permissions
-            List<String> studentPermissionNames = Arrays.asList(
-                "take_quiz",
-                "view_lessons",
-                "participate_discussion"
-            );
-            
-            for (String permissionName : studentPermissionNames) {
-                permissionRepository.findByName(permissionName)
-                        .ifPresent(studentPermissions::add);
-            }
-            
-            Role studentRole = Role.builder()
+        Role studentRole = null;
+        if (roleRepository.existsByName("STUDENT")) {
+            // Update existing STUDENT role with new permissions
+            studentRole = roleRepository.findByName("STUDENT").get();
+            studentRole.getPermissions().clear(); // Clear old permissions
+        } else {
+            // Create new STUDENT role
+            studentRole = Role.builder()
                     .name("STUDENT")
-                    .permissions(studentPermissions)
+                    .permissions(new HashSet<>())
                     .build();
-            
-            roleRepository.save(studentRole);
-            log.info("Created STUDENT role with {} permissions", studentPermissions.size());
         }
     }
     
     private void initializeTeacherRole() {
-        if (!roleRepository.existsByName("TEACHER")) {
-            Set<Permission> teacherPermissions = new HashSet<>();
-            
-            // Teacher permissions
-            List<String> teacherPermissionNames = Arrays.asList(
-                "upload_lesson",
-                "create_quiz",
-                "grade_quiz",
-                "manage_students",
-                "view_reports",
-                "manage_subjects",
-                "view_lessons",
-                "participate_discussion",
-                "take_quiz",
-                "view_role_details"
-            );
-            
-            for (String permissionName : teacherPermissionNames) {
-                permissionRepository.findByName(permissionName)
-                        .ifPresent(teacherPermissions::add);
-            }
-            
-            Role teacherRole = Role.builder()
+        Role teacherRole = null;
+        if (roleRepository.existsByName("TEACHER")) {
+            // Update existing TEACHER role with new permissions
+            teacherRole = roleRepository.findByName("TEACHER").get();
+            teacherRole.getPermissions().clear(); // Clear old permissions
+        } else {
+            // Create new TEACHER role
+            teacherRole = Role.builder()
                     .name("TEACHER")
-                    .permissions(teacherPermissions)
+                    .permissions(new HashSet<>())
                     .build();
-            
-            roleRepository.save(teacherRole);
-            log.info("Created TEACHER role with {} permissions", teacherPermissions.size());
         }
     }
     
     private void initializeAdminRole() {
-        if (!roleRepository.existsByName("ADMIN")) {
-            Set<Permission> adminPermissions = new HashSet<>();
-            
-            // Admin gets all permissions
-            List<Permission> allPermissions = permissionRepository.findAll();
-            adminPermissions.addAll(allPermissions);
-            
-            Role adminRole = Role.builder()
+        Role adminRole = null;
+        if (roleRepository.existsByName("ADMIN")) {
+            // Update existing ADMIN role with new permissions
+            adminRole = roleRepository.findByName("ADMIN").get();
+            adminRole.getPermissions().clear(); // Clear old permissions
+        } else {
+            // Create new ADMIN role
+            adminRole = Role.builder()
                     .name("ADMIN")
-                    .permissions(adminPermissions)
+                    .permissions(new HashSet<>())
                     .build();
-            
-            roleRepository.save(adminRole);
-            log.info("Created ADMIN role with {} permissions", adminPermissions.size());
         }
+
+        // Admin gets all permissions
+        List<Permission> allPermissions = permissionRepository.findAll();
+        adminRole.getPermissions().addAll(allPermissions);
+
+        roleRepository.save(adminRole);
+        log.info("Created/Updated ADMIN role with {} permissions", adminRole.getPermissions().size());
     }
 }

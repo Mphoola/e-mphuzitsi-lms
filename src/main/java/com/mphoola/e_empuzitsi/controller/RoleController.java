@@ -53,7 +53,7 @@ public class RoleController {
     }
     
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('view_role_details')")
+    @PreAuthorize("hasAuthority('show_role_details')")
     @Operation(summary = "Get role by ID")
     public ResponseEntity<RoleResponse> getRoleById(@PathVariable Long id) {
         RoleResponse response = roleService.getRoleById(id);

@@ -75,7 +75,10 @@ public class AuthService {
         String token = jwtUtil.generateToken(savedUser.getEmail());
         
         // Get user response with roles and permissions using UserService
-        UserResponse userResponse = userService.mapToUserResponse(savedUser);
+        // Reload user with roles and permissions
+        User userWithRoles = userRepository.findByEmailWithRolesAndPermissions(savedUser.getEmail())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found after registration"));
+        UserResponse userResponse = userService.mapToUserResponse(userWithRoles);
         
         return AuthResponse.builder()
                 .token(token)
@@ -99,8 +102,8 @@ public class AuthService {
             // Generate JWT token
             String token = jwtUtil.generateToken(authentication);
             
-            // Get user response
-            User user = userRepository.findByEmail(request.getEmail())
+            // Get user response with roles and permissions
+            User user = userRepository.findByEmailWithRolesAndPermissions(request.getEmail())
                     .orElseThrow(() -> new ResourceNotFoundException("User not found"));
             UserResponse userResponse = userService.mapToUserResponse(user);
             

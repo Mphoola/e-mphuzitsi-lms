@@ -35,7 +35,7 @@ public class UserService {
      */
     public UserResponse getUserById(Long id) {
         
-        User user = userRepository.findById(id)
+        User user = userRepository.findByIdWithRolesAndPermissions(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         
         return mapToUserResponse(user);
@@ -45,7 +45,7 @@ public class UserService {
      * Get user by email with roles and permissions
      */
     public UserResponse getUserByEmail(String email) {        
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailWithRolesAndPermissions(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
         
         return mapToUserResponse(user);
@@ -77,7 +77,7 @@ public class UserService {
      * Generate and send password reset token
      */
     public void forgotPassword(String email) {
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailWithRolesAndPermissions(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
         
         // Generate reset token

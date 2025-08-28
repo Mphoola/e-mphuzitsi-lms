@@ -67,7 +67,7 @@ public class UserServiceTest {
     @Test
     void getUserById_WithValidId_ShouldReturnUserResponse() {
         // Given
-        when(userRepository.findById(1L)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByIdWithRolesAndPermissions(1L)).thenReturn(Optional.of(testUser));
 
         // When
         UserResponse result = userService.getUserById(1L);
@@ -78,27 +78,27 @@ public class UserServiceTest {
         assertThat(result.getName()).isEqualTo(testUser.getName());
         assertThat(result.getEmail()).isEqualTo(testUser.getEmail());
 
-        verify(userRepository).findById(1L);
+        verify(userRepository).findByIdWithRolesAndPermissions(1L);
     }
 
     @Test
     void getUserById_WithInvalidId_ShouldThrowResourceNotFoundException() {
         // Given
-        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+        when(userRepository.findByIdWithRolesAndPermissions(999L)).thenReturn(Optional.empty());
 
         // When/Then
         assertThatThrownBy(() -> userService.getUserById(999L))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("User not found with id: 999");
 
-        verify(userRepository).findById(999L);
+        verify(userRepository).findByIdWithRolesAndPermissions(999L);
     }
 
     @Test
     void getUserByEmail_WithValidEmail_ShouldReturnUserResponse() {
         // Given
         String email = "john.doe@example.com";
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmailWithRolesAndPermissions(email)).thenReturn(Optional.of(testUser));
 
         // When
         UserResponse result = userService.getUserByEmail(email);
@@ -109,21 +109,21 @@ public class UserServiceTest {
         assertThat(result.getName()).isEqualTo(testUser.getName());
         assertThat(result.getEmail()).isEqualTo(testUser.getEmail());
 
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findByEmailWithRolesAndPermissions(email);
     }
 
     @Test
     void getUserByEmail_WithInvalidEmail_ShouldThrowResourceNotFoundException() {
         // Given
         String email = "nonexistent@example.com";
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(userRepository.findByEmailWithRolesAndPermissions(email)).thenReturn(Optional.empty());
 
         // When/Then
         assertThatThrownBy(() -> userService.getUserByEmail(email))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("User not found with email: " + email);
 
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findByEmailWithRolesAndPermissions(email);
     }
 
     @Test
@@ -137,7 +137,7 @@ public class UserServiceTest {
             when(mockAuthentication.getName()).thenReturn(email);
             mockedSecurityContextHolder.when(SecurityContextHolder::getContext).thenReturn(mockSecurityContext);
             
-            when(userRepository.findByEmail(email)).thenReturn(Optional.of(testUser));
+            when(userRepository.findByEmailWithRolesAndPermissions(email)).thenReturn(Optional.of(testUser));
 
             // When
             UserResponse result = userService.getCurrentUser();
@@ -146,7 +146,7 @@ public class UserServiceTest {
             assertThat(result).isNotNull();
             assertThat(result.getEmail()).isEqualTo(email);
 
-            verify(userRepository).findByEmail(email);
+            verify(userRepository).findByEmailWithRolesAndPermissions(email);
         }
     }
 
@@ -211,7 +211,7 @@ public class UserServiceTest {
     void forgotPassword_WithValidEmail_ShouldGenerateTokenAndSendEmail() {
         // Given
         String email = "john.doe@example.com";
-        when(userRepository.findByEmail(email)).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmailWithRolesAndPermissions(email)).thenReturn(Optional.of(testUser));
         when(userRepository.save(any(User.class))).thenReturn(testUser);
         doNothing().when(emailService).sendPasswordResetEmail(anyString(), anyString());
 
@@ -219,7 +219,7 @@ public class UserServiceTest {
         userService.forgotPassword(email);
 
         // Then
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findByEmailWithRolesAndPermissions(email);
         verify(userRepository).save(argThat(user -> {
             assertThat(user.getResetToken()).isNotNull();
             assertThat(user.getResetTokenExpiresAt()).isAfter(LocalDateTime.now().plusHours(23));
@@ -232,14 +232,14 @@ public class UserServiceTest {
     void forgotPassword_WithInvalidEmail_ShouldThrowResourceNotFoundException() {
         // Given
         String email = "nonexistent@example.com";
-        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
+        when(userRepository.findByEmailWithRolesAndPermissions(email)).thenReturn(Optional.empty());
 
         // When/Then
         assertThatThrownBy(() -> userService.forgotPassword(email))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("User not found with email: " + email);
 
-        verify(userRepository).findByEmail(email);
+        verify(userRepository).findByEmailWithRolesAndPermissions(email);
         verify(userRepository, never()).save(any(User.class));
         verify(emailService, never()).sendPasswordResetEmail(anyString(), anyString());
     }

@@ -31,8 +31,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         try {
-            // Temporarily use simple query to debug
-            User user = userRepository.findByEmail(email)
+            // Use specialized method to eagerly load roles and permissions
+            User user = userRepository.findByEmailWithRolesAndPermissions(email)
                     .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
             
             return UserPrincipal.create(user, getAuthorities(user));
@@ -46,8 +46,8 @@ public class CustomUserDetailsService implements UserDetailsService {
      * Load user by ID for JWT authentication
      */
     public UserDetails loadUserById(Long id) {
-        // Temporarily use simple query to debug
-        User user = userRepository.findById(id)
+        // Use specialized method to eagerly load roles and permissions
+        User user = userRepository.findByIdWithRolesAndPermissions(id)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
         
         return UserPrincipal.create(user, getAuthorities(user));
