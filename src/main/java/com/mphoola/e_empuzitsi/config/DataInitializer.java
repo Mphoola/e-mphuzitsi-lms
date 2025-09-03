@@ -127,7 +127,14 @@ public class DataInitializer implements CommandLineRunner {
             "assign_user_permission",
             "revoke_user_permission",
             "list_user_permissions",
-            "manage_user_access"
+            "manage_user_access",
+            
+            // Academic year management permissions
+            "list_academic_years",
+            "create_academic_year",
+            "update_academic_year",
+            "delete_academic_year",
+            "activate_academic_year"
         );
         
         for (String permissionName : permissionNames) {
