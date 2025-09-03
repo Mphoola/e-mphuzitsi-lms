@@ -108,14 +108,26 @@ public class DataInitializer implements CommandLineRunner {
 
     private void initializePermissions() {
         List<String> permissionNames = Arrays.asList(
+            // Role management permissions
             "add_role",
             "update_role",
             "delete_role",
             "show_role_details",
             "list_roles",
+            
+            // Activity log permissions
             "list_audit_logs",
             "see_log_details",
-            "list_user_audit_log"
+            "list_user_audit_log",
+            
+            // User role and permission management
+            "assign_user_role",
+            "revoke_user_role",
+            "list_user_roles",
+            "assign_user_permission",
+            "revoke_user_permission",
+            "list_user_permissions",
+            "manage_user_access"
         );
         
         for (String permissionName : permissionNames) {

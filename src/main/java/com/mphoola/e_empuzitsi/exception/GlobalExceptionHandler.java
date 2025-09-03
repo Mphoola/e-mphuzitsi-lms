@@ -260,6 +260,26 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * Handle validation errors
+     */
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(
+            ValidationException ex, 
+            HttpServletRequest request) {
+        
+        log.warn("Validation error for path: {} - {}", request.getRequestURI(), ex.getMessage());
+        
+        ErrorResponse errorResponse = ErrorResponse.builder()
+                .message(ex.getMessage())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Bad Request")
+                .path(request.getRequestURI())
+                .build();
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
      * Handle role in use errors
      */
     @ExceptionHandler(RoleInUseException.class)
