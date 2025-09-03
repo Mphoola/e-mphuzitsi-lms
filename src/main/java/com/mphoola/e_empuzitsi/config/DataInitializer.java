@@ -151,6 +151,10 @@ public class DataInitializer implements CommandLineRunner {
                     .permissions(new HashSet<>())
                     .build();
         }
+
+        // Save the STUDENT role
+        roleRepository.save(studentRole);
+        log.info("Created/Updated STUDENT role with {} permissions", studentRole.getPermissions().size());
     }
     
     private void initializeTeacherRole() {
@@ -166,6 +170,10 @@ public class DataInitializer implements CommandLineRunner {
                     .permissions(new HashSet<>())
                     .build();
         }
+
+        // Save the TEACHER role
+        roleRepository.save(teacherRole);
+        log.info("Created/Updated TEACHER role with {} permissions", teacherRole.getPermissions().size());
     }
     
     private void initializeAdminRole() {
