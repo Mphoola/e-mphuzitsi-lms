@@ -1,5 +1,7 @@
 package com.mphoola.e_empuzitsi.entity;
 
+import com.mphoola.e_empuzitsi.annotation.Loggable;
+import com.mphoola.e_empuzitsi.listener.ActivityLogEntityListener;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +17,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@EntityListeners(AuditingEntityListener.class)
+@EntityListeners({AuditingEntityListener.class, ActivityLogEntityListener.class})
+@Loggable(logName = "user", excludeFields = {"password", "resetToken"})
 @Getter
 @Setter
 @NoArgsConstructor

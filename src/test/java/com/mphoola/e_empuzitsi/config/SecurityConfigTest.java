@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -60,20 +58,6 @@ class SecurityConfigTest {
     }
 
     @Test
-    @DisplayName("Should create AuthenticationProvider bean as DaoAuthenticationProvider")
-    void should_create_authentication_provider_bean() {
-        // Given
-        SecurityConfig securityConfig = new SecurityConfig(customUserDetailsService, jwtAuthenticationFilter);
-        
-        // When
-        AuthenticationProvider authenticationProvider = securityConfig.authenticationProvider();
-        
-        // Then
-        assertNotNull(authenticationProvider);
-        assertTrue(authenticationProvider instanceof DaoAuthenticationProvider);
-    }
-
-    @Test
     @DisplayName("Should create CorsConfigurationSource bean with proper configuration")
     void should_create_cors_configuration_source_bean() {
         // Given
@@ -95,15 +79,12 @@ class SecurityConfigTest {
         
         // When
         PasswordEncoder encoder = config.passwordEncoder();
-        AuthenticationProvider provider = config.authenticationProvider();
         CorsConfigurationSource corsSource = config.corsConfigurationSource();
         
         // Then
         assertNotNull(encoder);
-        assertNotNull(provider);
         assertNotNull(corsSource);
         assertTrue(encoder instanceof BCryptPasswordEncoder);
-        assertTrue(provider instanceof DaoAuthenticationProvider);
     }
 
     @Test

@@ -112,7 +112,10 @@ public class DataInitializer implements CommandLineRunner {
             "update_role",
             "delete_role",
             "show_role_details",
-            "list_roles"
+            "list_roles",
+            "list_audit_logs",
+            "see_log_details",
+            "list_user_audit_log"
         );
         
         for (String permissionName : permissionNames) {
