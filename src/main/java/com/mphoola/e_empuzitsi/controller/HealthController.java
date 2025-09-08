@@ -1,6 +1,8 @@
 package com.mphoola.e_empuzitsi.controller;
 
+import com.mphoola.e_empuzitsi.util.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,20 +35,20 @@ public class HealthController {
             health.put("status", "UP");
             health.put("timestamp", System.currentTimeMillis());
             
-            return ResponseEntity.ok(health);
+            return ApiResponse.success("Health check completed successfully", health);
             
         } catch (Exception e) {
             health.put("status", "DOWN");
             health.put("error", e.getMessage());
             health.put("timestamp", System.currentTimeMillis());
             
-            return ResponseEntity.status(500).body(health);
+            return ApiResponse.error("Health check failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     
     @GetMapping("/simple")
-    public ResponseEntity<String> simpleCheck() {
-        return ResponseEntity.ok("Application is running!");
+    public ResponseEntity<Map<String, Object>> simpleCheck() {
+        return ApiResponse.success("Application is running!");
     }
     
     @GetMapping
@@ -55,6 +57,6 @@ public class HealthController {
         health.put("status", "UP");
         health.put("message", "Application is running!");
         health.put("timestamp", System.currentTimeMillis());
-        return ResponseEntity.ok(health);
+        return ApiResponse.success("Application health check completed", health);
     }
 }

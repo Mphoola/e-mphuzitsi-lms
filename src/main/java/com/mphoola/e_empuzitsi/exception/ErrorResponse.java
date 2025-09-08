@@ -8,6 +8,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * @deprecated This class is deprecated. Use ApiResponse utility class for standardized responses.
+ * The GlobalExceptionHandler now uses ApiResponse to maintain consistency with all other endpoints.
+ * This class is kept for backward compatibility with existing tests only.
+ */
+@Deprecated(since = "2.0.0", forRemoval = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
