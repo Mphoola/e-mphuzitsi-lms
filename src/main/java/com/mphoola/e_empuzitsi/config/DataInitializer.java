@@ -116,6 +116,13 @@ public class DataInitializer implements CommandLineRunner {
             "list_users_by_role",
             "list_roles",
             
+            // Subject management permissions
+            "add_subject",
+            "update_subject",
+            "delete_subject",
+            "show_subject_details",
+            "list_subjects",
+            
             // Activity log permissions
             "list_audit_logs",
             "see_log_details",
