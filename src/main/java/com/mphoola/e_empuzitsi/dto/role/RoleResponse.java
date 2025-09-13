@@ -1,5 +1,6 @@
 package com.mphoola.e_empuzitsi.dto.role;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.mphoola.e_empuzitsi.dto.user.UserResponseSimple;
 
 import lombok.AllArgsConstructor;
@@ -22,6 +23,10 @@ public class RoleResponse {
     private List<UserResponseSimple> users;
     private Long userCount;
     private Long permissionCount;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createdAt;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime updatedAt;
 }
