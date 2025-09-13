@@ -4,7 +4,7 @@ import com.mphoola.e_empuzitsi.dto.role.PermissionResponse;
 import com.mphoola.e_empuzitsi.dto.role.RoleRequest;
 import com.mphoola.e_empuzitsi.dto.role.RoleResponse;
 import com.mphoola.e_empuzitsi.dto.role.RoleResponseSimple;
-import com.mphoola.e_empuzitsi.dto.user.UserResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserResponseSimple;
 import com.mphoola.e_empuzitsi.entity.Permission;
 import com.mphoola.e_empuzitsi.entity.Role;
 import com.mphoola.e_empuzitsi.entity.User;
@@ -13,6 +13,10 @@ import com.mphoola.e_empuzitsi.exception.ResourceNotFoundException;
 import com.mphoola.e_empuzitsi.exception.RoleInUseException;
 import com.mphoola.e_empuzitsi.repository.PermissionRepository;
 import com.mphoola.e_empuzitsi.repository.RoleRepository;
+import com.mphoola.e_empuzitsi.repository.UserRepository;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +32,12 @@ public class RoleService {
     
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
-    
-    public RoleService(RoleRepository roleRepository, PermissionRepository permissionRepository) {
+    private final UserRepository userRepository;
+
+    public RoleService(RoleRepository roleRepository, PermissionRepository permissionRepository, UserRepository userRepository) {
         this.roleRepository = roleRepository;
         this.permissionRepository = permissionRepository;
+        this.userRepository = userRepository;
     }
     
     public RoleResponse createRole(RoleRequest request) {
@@ -106,6 +112,15 @@ public class RoleService {
         
         return mapToRoleResponseWithoutPermissions(role);
     }
+
+    @Transactional(readOnly = true)
+    public Page<UserResponseSimple> getUsersByRole(Long roleId, Pageable pageable) {
+        Role role = roleRepository.findById(roleId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
+
+        Page<User> usersPage = userRepository.findByRoleId(roleId, pageable);
+        return usersPage.map(this::mapToSimpleUserResponse);
+   }
     
     private Set<Permission> validateAndFetchPermissions(Set<Long> permissionIds) {
         if (permissionIds == null || permissionIds.isEmpty()) {
@@ -121,25 +136,6 @@ public class RoleService {
         }
         
         return permissions;
-    }
-    
-    private RoleResponse mapToRoleResponse(Role role) {
-        Set<PermissionResponse> permissionResponses = role.getPermissions() != null 
-                ? role.getPermissions().stream()
-                        .map(this::mapToPermissionResponse)
-                        .collect(Collectors.toSet())
-                : new HashSet<>();
-        
-        return RoleResponse.builder()
-                .id(role.getId())
-                .name(role.getName())
-                .permissions(permissionResponses)
-                .users(new ArrayList<>())
-                .userCount(0L)
-                .permissionCount((long) permissionResponses.size())
-                .createdAt(role.getCreatedAt())
-                .updatedAt(role.getUpdatedAt())
-                .build();
     }
     
     private RoleResponse mapToRoleResponseWithoutPermissions(Role role) {
@@ -158,18 +154,19 @@ public class RoleService {
     private RoleResponseSimple mapToRoleResponseWithCounts(Role role) {
         long userCount = roleRepository.countUsersByRoleId(role.getId());
         long permissionCount = role.getPermissions() != null ? role.getPermissions().size() : 0;
-        List<PermissionResponse> permissions = role.getPermissions() != null
+        List<String> permissionNames = role.getPermissions() != null
                 ? role.getPermissions().stream()
-                        .map(this::mapToPermissionResponse)
-                        .collect(Collectors.toList())
+                    .map(Permission::getName)
+                    .limit(8)
+                    .collect(Collectors.toList())
                 : new ArrayList<>();
 
         return RoleResponseSimple.builder()
                 .id(role.getId())
                 .name(role.getName())
+                .permissions(new HashSet<>(permissionNames))
                 .userCount(userCount)
                 .permissionCount(permissionCount)
-                .permissions(permissions)
                 .build();
     }
     
@@ -183,8 +180,9 @@ public class RoleService {
         
         // Get users with this role
         List<User> users = roleRepository.findUsersByRoleId(role.getId());
-        List<UserResponse> userResponses = users.stream()
+        List<UserResponseSimple> userResponses = users.stream()
                 .map(this::mapToSimpleUserResponse)
+                .limit(10)
                 .collect(Collectors.toList());
         
         return RoleResponse.builder()
@@ -203,20 +201,16 @@ public class RoleService {
         return PermissionResponse.builder()
                 .id(permission.getId())
                 .name(permission.getName())
-                .createdAt(permission.getCreatedAt())
-                .updatedAt(permission.getUpdatedAt())
                 .build();
     }
     
-    private UserResponse mapToSimpleUserResponse(User user) {
-        return UserResponse.builder()
+    private UserResponseSimple mapToSimpleUserResponse(User user) {
+        return UserResponseSimple.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
-                .roles(new HashSet<>()) // Empty for role details view to avoid recursion
-                .permissions(new HashSet<>()) // Empty for role details view to avoid recursion
-                .createdAt(user.getCreatedAt())
-                .updatedAt(user.getUpdatedAt())
                 .build();
     }
+
+
 }

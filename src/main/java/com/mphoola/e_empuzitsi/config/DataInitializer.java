@@ -113,6 +113,7 @@ public class DataInitializer implements CommandLineRunner {
             "update_role",
             "delete_role",
             "show_role_details",
+            "list_users_by_role",
             "list_roles",
             
             // Activity log permissions

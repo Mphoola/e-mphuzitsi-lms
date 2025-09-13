@@ -66,17 +66,17 @@ class GlobalExceptionHandlerTest {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/api/users");
 
         // When
-        ResponseEntity<ErrorResponse> response = globalExceptionHandler
+        ResponseEntity<Map<String, Object>> response = globalExceptionHandler
             .handleMediaTypeNotSupportedException(exception, request);
 
         // Then
         assertThat(response.getStatusCode().value()).isEqualTo(415);
-        ErrorResponse body = response.getBody();
+        Map<String, Object> body = response.getBody();
         assertThat(body).isNotNull();
-        assertThat(body.getMessage()).contains("Content type not supported");
-        assertThat(body.getStatus()).isEqualTo(415);
-        assertThat(body.getError()).isEqualTo("Unsupported Media Type");
-        assertThat(body.getPath()).isEqualTo("/api/users");
+        assertThat(body.get("message")).asString().contains("Content type not supported");
+        assertThat(body.get("status")).isEqualTo(415);
+        assertThat(body.get("error")).isEqualTo("Unsupported Media Type");
+        assertThat(body.get("path")).isEqualTo("/api/users");
     }
 
     @Test

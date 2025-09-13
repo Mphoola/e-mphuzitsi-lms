@@ -3,11 +3,16 @@ package com.mphoola.e_empuzitsi.controller;
 import com.mphoola.e_empuzitsi.dto.role.RoleRequest;
 import com.mphoola.e_empuzitsi.dto.role.RoleResponse;
 import com.mphoola.e_empuzitsi.dto.role.RoleResponseSimple;
+import com.mphoola.e_empuzitsi.dto.user.UserResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserResponseSimple;
 import com.mphoola.e_empuzitsi.service.RoleService;
 import com.mphoola.e_empuzitsi.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -56,6 +61,17 @@ public class RoleController {
     public ResponseEntity<Map<String, Object>> getRoleById(@PathVariable Long id) {
         RoleResponse response = roleService.getRoleById(id);
         return ApiResponse.success("Role retrieved successfully", response);
+    }
+
+    @GetMapping("/{roleId}/users")
+    @PreAuthorize("hasAuthority('list_users_by_role')")
+    @Operation(summary = "List users with a particular role")
+    public ResponseEntity<Map<String, Object>> getUsersByRole(
+            @PathVariable Long roleId,
+            Pageable pageable // Spring injects page, size, sort from query params
+    ) {
+        Page<UserResponseSimple> users = roleService.getUsersByRole(roleId, pageable);
+        return ApiResponse.success("Users retrieved successfully", users);
     }
     
     @GetMapping

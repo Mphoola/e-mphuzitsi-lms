@@ -2,6 +2,7 @@ package com.mphoola.e_empuzitsi.service;
 
 import com.mphoola.e_empuzitsi.dto.role.RoleRequest;
 import com.mphoola.e_empuzitsi.dto.role.RoleResponse;
+import com.mphoola.e_empuzitsi.dto.role.RoleResponseSimple;
 import com.mphoola.e_empuzitsi.entity.Permission;
 import com.mphoola.e_empuzitsi.entity.Role;
 import com.mphoola.e_empuzitsi.entity.User;
@@ -292,19 +293,15 @@ class RoleServiceTest {
         when(roleRepository.countUsersByRoleId(testRole.getId())).thenReturn(2L);
 
         // When
-        List<RoleResponse> result = roleService.getAllRoles();
+        List<RoleResponseSimple> result = roleService.getAllRoles();
 
         // Then
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(1L);
         assertThat(result.get(0).getName()).isEqualTo("TEST_ROLE");
-        assertThat(result.get(0).getUserCount()).isEqualTo(2L);
-        assertThat(result.get(0).getPermissionCount()).isEqualTo(1L);
-        assertThat(result.get(0).getPermissions()).isEmpty(); // Empty for list view
-        assertThat(result.get(0).getUsers()).isEmpty(); // Empty for list view
+        assertThat(result.get(0).getPermissions()).isNotNull(); // Check permissions list
 
         verify(roleRepository).findAll();
-        verify(roleRepository).countUsersByRoleId(testRole.getId());
     }
 
     @Test

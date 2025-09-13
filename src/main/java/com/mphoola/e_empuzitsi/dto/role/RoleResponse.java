@@ -1,6 +1,7 @@
 package com.mphoola.e_empuzitsi.dto.role;
 
-import com.mphoola.e_empuzitsi.dto.user.UserResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserResponseSimple;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,7 @@ public class RoleResponse {
     private Long id;
     private String name;
     private Set<PermissionResponse> permissions;
-    private List<UserResponse> users;
+    private List<UserResponseSimple> users;
     private Long userCount;
     private Long permissionCount;
     private LocalDateTime createdAt;
