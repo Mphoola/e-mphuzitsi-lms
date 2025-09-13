@@ -1,7 +1,7 @@
 package com.mphoola.e_empuzitsi.service;
 
-import com.mphoola.e_empuzitsi.dto.AcademicYearRequest;
-import com.mphoola.e_empuzitsi.dto.AcademicYearResponse;
+import com.mphoola.e_empuzitsi.dto.academic.AcademicYearRequest;
+import com.mphoola.e_empuzitsi.dto.academic.AcademicYearResponse;
 import com.mphoola.e_empuzitsi.entity.AcademicYear;
 import com.mphoola.e_empuzitsi.exception.ResourceNotFoundException;
 import com.mphoola.e_empuzitsi.exception.ValidationException;

@@ -1,4 +1,4 @@
-package com.mphoola.e_empuzitsi.dto;
+package com.mphoola.e_empuzitsi.dto.activity;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;

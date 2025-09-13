@@ -1,8 +1,8 @@
 package com.mphoola.e_empuzitsi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mphoola.e_empuzitsi.dto.AcademicYearRequest;
-import com.mphoola.e_empuzitsi.dto.AcademicYearResponse;
+import com.mphoola.e_empuzitsi.dto.academic.AcademicYearRequest;
+import com.mphoola.e_empuzitsi.dto.academic.AcademicYearResponse;
 import com.mphoola.e_empuzitsi.service.AcademicYearService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

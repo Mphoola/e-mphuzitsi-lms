@@ -1,5 +1,12 @@
 package com.mphoola.e_empuzitsi.dto;
 
+import com.mphoola.e_empuzitsi.dto.auth.ForgotPasswordRequest;
+import com.mphoola.e_empuzitsi.dto.auth.ResetPasswordRequest;
+import com.mphoola.e_empuzitsi.dto.auth.AuthResponse;
+import com.mphoola.e_empuzitsi.dto.auth.LoginRequest;
+import com.mphoola.e_empuzitsi.dto.auth.RegisterRequest;
+import com.mphoola.e_empuzitsi.dto.user.UserResponse;
+import com.mphoola.e_empuzitsi.dto.common.MessageResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;

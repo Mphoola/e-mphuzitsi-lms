@@ -1,7 +1,7 @@
 package com.mphoola.e_empuzitsi.controller;
 
-import com.mphoola.e_empuzitsi.dto.AcademicYearRequest;
-import com.mphoola.e_empuzitsi.dto.AcademicYearResponse;
+import com.mphoola.e_empuzitsi.dto.academic.AcademicYearRequest;
+import com.mphoola.e_empuzitsi.dto.academic.AcademicYearResponse;
 import com.mphoola.e_empuzitsi.service.AcademicYearService;
 import com.mphoola.e_empuzitsi.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

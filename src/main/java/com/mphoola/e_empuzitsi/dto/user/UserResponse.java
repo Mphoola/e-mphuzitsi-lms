@@ -1,4 +1,4 @@
-package com.mphoola.e_empuzitsi.dto;
+package com.mphoola.e_empuzitsi.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

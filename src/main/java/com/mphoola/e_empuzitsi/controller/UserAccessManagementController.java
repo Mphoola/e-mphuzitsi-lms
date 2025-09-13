@@ -1,6 +1,10 @@
 package com.mphoola.e_empuzitsi.controller;
 
-import com.mphoola.e_empuzitsi.dto.*;
+import com.mphoola.e_empuzitsi.dto.user.UserRoleRequest;
+import com.mphoola.e_empuzitsi.dto.user.UserRoleResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserPermissionRequest;
+import com.mphoola.e_empuzitsi.dto.user.UserPermissionResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserAccessResponse;
 import com.mphoola.e_empuzitsi.service.UserAccessManagementService;
 import com.mphoola.e_empuzitsi.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;

@@ -122,7 +122,7 @@ public class ApiResponse {
      */
     
     /**
-     * Create an "ok" response with data (Laravel pattern)
+     * Create an "ok" response with data 
      */
     public static <T> ResponseEntity<Map<String, Object>> ok(T data) {
         return success("Completed successfully", data);
@@ -136,7 +136,7 @@ public class ApiResponse {
     }
     
     /**
-     * Create a "created" response (Laravel pattern)
+     * Create a "created" response 
      */
     public static <T> ResponseEntity<Map<String, Object>> created(T data) {
         Map<String, Object> response = new HashMap<>();
@@ -147,7 +147,7 @@ public class ApiResponse {
     }
     
     /**
-     * Create an "accepted" response (Laravel pattern)
+     * Create an "accepted" response 
      */
     public static <T> ResponseEntity<Map<String, Object>> accepted(T data) {
         Map<String, Object> response = new HashMap<>();
@@ -158,14 +158,14 @@ public class ApiResponse {
     }
     
     /**
-     * Create a "failed" response (Laravel pattern)
+     * Create a "failed" response 
      */
     public static ResponseEntity<Map<String, Object>> failed(String message) {
         return error(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
     /**
-     * Create an "unprocessable" response (Laravel pattern)
+     * Create an "unprocessable" response 
      */
     public static ResponseEntity<Map<String, Object>> unprocessable(String message) {
         return error(message, HttpStatus.UNPROCESSABLE_ENTITY);
@@ -212,7 +212,7 @@ public class ApiResponse {
     }
     
     /**
-     * Create an error response with validation errors (Laravel pattern)
+     * Create an error response with validation errors 
      */
     public static ResponseEntity<Map<String, Object>> errorWithMeta(String message, Map<String, Object> errors, HttpStatus status, String path) {
         Map<String, Object> response = new HashMap<>();

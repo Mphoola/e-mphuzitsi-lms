@@ -1,5 +1,6 @@
 package com.mphoola.e_empuzitsi.dto;
 
+import com.mphoola.e_empuzitsi.dto.auth.RegisterRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;

@@ -1,6 +1,13 @@
 package com.mphoola.e_empuzitsi.service;
 
-import com.mphoola.e_empuzitsi.dto.*;
+import com.mphoola.e_empuzitsi.dto.user.UserRoleRequest;
+import com.mphoola.e_empuzitsi.dto.user.UserRoleResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserPermissionRequest;
+import com.mphoola.e_empuzitsi.dto.user.UserPermissionResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserAccessResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserResponse;
+import com.mphoola.e_empuzitsi.dto.role.RoleResponse;
+import com.mphoola.e_empuzitsi.dto.role.PermissionResponse;
 import com.mphoola.e_empuzitsi.entity.*;
 import com.mphoola.e_empuzitsi.exception.ResourceNotFoundException;
 import com.mphoola.e_empuzitsi.exception.ValidationException;

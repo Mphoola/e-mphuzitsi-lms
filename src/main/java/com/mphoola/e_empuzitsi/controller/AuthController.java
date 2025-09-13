@@ -1,12 +1,12 @@
 package com.mphoola.e_empuzitsi.controller;
 
-import com.mphoola.e_empuzitsi.dto.AuthResponse;
-import com.mphoola.e_empuzitsi.dto.LoginRequest;
-import com.mphoola.e_empuzitsi.dto.RegisterRequest;
-import com.mphoola.e_empuzitsi.dto.UserResponse;
-import com.mphoola.e_empuzitsi.dto.ForgotPasswordRequest;
-import com.mphoola.e_empuzitsi.dto.ResetPasswordRequest;
-import com.mphoola.e_empuzitsi.dto.MessageResponse;
+import com.mphoola.e_empuzitsi.dto.auth.AuthResponse;
+import com.mphoola.e_empuzitsi.dto.auth.LoginRequest;
+import com.mphoola.e_empuzitsi.dto.auth.RegisterRequest;
+import com.mphoola.e_empuzitsi.dto.user.UserResponse;
+import com.mphoola.e_empuzitsi.dto.auth.ForgotPasswordRequest;
+import com.mphoola.e_empuzitsi.dto.auth.ResetPasswordRequest;
+import com.mphoola.e_empuzitsi.dto.common.MessageResponse;
 import com.mphoola.e_empuzitsi.service.AuthService;
 import com.mphoola.e_empuzitsi.service.UserService;
 import com.mphoola.e_empuzitsi.util.ApiResponse;

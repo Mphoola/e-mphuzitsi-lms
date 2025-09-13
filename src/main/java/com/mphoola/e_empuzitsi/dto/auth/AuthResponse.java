@@ -1,5 +1,6 @@
-package com.mphoola.e_empuzitsi.dto;
+package com.mphoola.e_empuzitsi.dto.auth;
 
+import com.mphoola.e_empuzitsi.dto.user.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

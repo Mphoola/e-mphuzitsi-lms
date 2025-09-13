@@ -1,7 +1,7 @@
 package com.mphoola.e_empuzitsi.service;
 
-import com.mphoola.e_empuzitsi.dto.RoleRequest;
-import com.mphoola.e_empuzitsi.dto.RoleResponse;
+import com.mphoola.e_empuzitsi.dto.role.RoleRequest;
+import com.mphoola.e_empuzitsi.dto.role.RoleResponse;
 import com.mphoola.e_empuzitsi.entity.Permission;
 import com.mphoola.e_empuzitsi.entity.Role;
 import com.mphoola.e_empuzitsi.entity.User;

@@ -1,4 +1,4 @@
-package com.mphoola.e_empuzitsi.dto;
+package com.mphoola.e_empuzitsi.dto.role;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

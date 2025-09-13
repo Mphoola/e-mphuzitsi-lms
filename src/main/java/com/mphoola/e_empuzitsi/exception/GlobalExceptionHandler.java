@@ -147,8 +147,6 @@ public class GlobalExceptionHandler {
             AuthenticationException ex, 
             HttpServletRequest request) {
         
-        log.warn("Authentication error for path: {} - {}", request.getRequestURI(), ex.getMessage());
-        
         return ApiResponse.unauthorized("Authentication failed. Please provide valid credentials.");
     }
     
@@ -159,8 +157,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleBadCredentialsException(
             BadCredentialsException ex, 
             HttpServletRequest request) {
-        
-        log.warn("Bad credentials for path: {} - {}", request.getRequestURI(), ex.getMessage());
         
         return ApiResponse.unauthorized("Invalid username or password.");
     }
@@ -173,8 +169,6 @@ public class GlobalExceptionHandler {
             InsufficientAuthenticationException ex, 
             HttpServletRequest request) {
         
-        log.warn("Insufficient authentication for path: {} - {}", request.getRequestURI(), ex.getMessage());
-        
         return ApiResponse.unauthorized("Authentication required. Please login to access this resource.");
     }
     
@@ -185,8 +179,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleExpiredJwtException(
             ExpiredJwtException ex, 
             HttpServletRequest request) {
-        
-        log.warn("Expired JWT token for path: {} - {}", request.getRequestURI(), ex.getMessage());
         
         return ApiResponse.unauthorized("Token has expired. Please login again.");
     }

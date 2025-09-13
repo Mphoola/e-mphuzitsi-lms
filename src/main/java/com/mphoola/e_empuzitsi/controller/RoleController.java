@@ -1,7 +1,8 @@
 package com.mphoola.e_empuzitsi.controller;
 
-import com.mphoola.e_empuzitsi.dto.RoleRequest;
-import com.mphoola.e_empuzitsi.dto.RoleResponse;
+import com.mphoola.e_empuzitsi.dto.role.RoleRequest;
+import com.mphoola.e_empuzitsi.dto.role.RoleResponse;
+import com.mphoola.e_empuzitsi.dto.role.RoleResponseSimple;
 import com.mphoola.e_empuzitsi.service.RoleService;
 import com.mphoola.e_empuzitsi.util.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,7 +62,7 @@ public class RoleController {
     @PreAuthorize("hasAuthority('list_roles')")
     @Operation(summary = "Get all roles")
     public ResponseEntity<Map<String, Object>> getAllRoles() {
-        List<RoleResponse> response = roleService.getAllRoles();
+        List<RoleResponseSimple> response = roleService.getAllRoles();
         return ApiResponse.success("Roles retrieved successfully", response);
     }
 }

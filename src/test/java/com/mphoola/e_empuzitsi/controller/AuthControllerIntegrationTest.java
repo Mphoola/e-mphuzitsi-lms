@@ -1,8 +1,8 @@
 package com.mphoola.e_empuzitsi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mphoola.e_empuzitsi.dto.LoginRequest;
-import com.mphoola.e_empuzitsi.dto.RegisterRequest;
+import com.mphoola.e_empuzitsi.dto.auth.LoginRequest;
+import com.mphoola.e_empuzitsi.dto.auth.RegisterRequest;
 import com.mphoola.e_empuzitsi.service.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,9 +1,9 @@
 package com.mphoola.e_empuzitsi.service;
 
-import com.mphoola.e_empuzitsi.dto.AuthResponse;
-import com.mphoola.e_empuzitsi.dto.LoginRequest;
-import com.mphoola.e_empuzitsi.dto.RegisterRequest;
-import com.mphoola.e_empuzitsi.dto.UserResponse;
+import com.mphoola.e_empuzitsi.dto.auth.AuthResponse;
+import com.mphoola.e_empuzitsi.dto.auth.LoginRequest;
+import com.mphoola.e_empuzitsi.dto.auth.RegisterRequest;
+import com.mphoola.e_empuzitsi.dto.user.UserResponse;
 import com.mphoola.e_empuzitsi.entity.Role;
 import com.mphoola.e_empuzitsi.entity.User;
 import com.mphoola.e_empuzitsi.entity.UserRole;

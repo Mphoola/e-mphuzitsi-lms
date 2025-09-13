@@ -1,10 +1,10 @@
 package com.mphoola.e_empuzitsi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mphoola.e_empuzitsi.dto.PermissionResponse;
-import com.mphoola.e_empuzitsi.dto.RoleRequest;
-import com.mphoola.e_empuzitsi.dto.RoleResponse;
-import com.mphoola.e_empuzitsi.dto.UserResponse;
+import com.mphoola.e_empuzitsi.dto.role.PermissionResponse;
+import com.mphoola.e_empuzitsi.dto.role.RoleRequest;
+import com.mphoola.e_empuzitsi.dto.role.RoleResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserResponse;
 import com.mphoola.e_empuzitsi.exception.ResourceConflictException;
 import com.mphoola.e_empuzitsi.exception.ResourceNotFoundException;
 import com.mphoola.e_empuzitsi.exception.RoleInUseException;

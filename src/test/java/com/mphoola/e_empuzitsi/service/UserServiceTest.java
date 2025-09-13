@@ -1,6 +1,6 @@
 package com.mphoola.e_empuzitsi.service;
 
-import com.mphoola.e_empuzitsi.dto.UserResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserResponse;
 import com.mphoola.e_empuzitsi.entity.User;
 import com.mphoola.e_empuzitsi.exception.BadCredentialsException;
 import com.mphoola.e_empuzitsi.exception.ResourceNotFoundException;

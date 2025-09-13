@@ -1,4 +1,4 @@
-package com.mphoola.e_empuzitsi.dto;
+package com.mphoola.e_empuzitsi.dto.role;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MessageResponse {
+public class PermissionResponse {
     
-    private String message;
+    private Long id;
+    private String name;
 }

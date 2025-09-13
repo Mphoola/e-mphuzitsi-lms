@@ -1,9 +1,10 @@
 package com.mphoola.e_empuzitsi.service;
 
-import com.mphoola.e_empuzitsi.dto.PermissionResponse;
-import com.mphoola.e_empuzitsi.dto.RoleRequest;
-import com.mphoola.e_empuzitsi.dto.RoleResponse;
-import com.mphoola.e_empuzitsi.dto.UserResponse;
+import com.mphoola.e_empuzitsi.dto.role.PermissionResponse;
+import com.mphoola.e_empuzitsi.dto.role.RoleRequest;
+import com.mphoola.e_empuzitsi.dto.role.RoleResponse;
+import com.mphoola.e_empuzitsi.dto.role.RoleResponseSimple;
+import com.mphoola.e_empuzitsi.dto.user.UserResponse;
 import com.mphoola.e_empuzitsi.entity.Permission;
 import com.mphoola.e_empuzitsi.entity.Role;
 import com.mphoola.e_empuzitsi.entity.User;
@@ -91,7 +92,7 @@ public class RoleService {
     }
     
     @Transactional(readOnly = true)
-    public List<RoleResponse> getAllRoles() {
+    public List<RoleResponseSimple> getAllRoles() {
         List<Role> roles = roleRepository.findAll();
         return roles.stream()
                 .map(this::mapToRoleResponseWithCounts)
@@ -154,19 +155,21 @@ public class RoleService {
                 .build();
     }
     
-    private RoleResponse mapToRoleResponseWithCounts(Role role) {
+    private RoleResponseSimple mapToRoleResponseWithCounts(Role role) {
         long userCount = roleRepository.countUsersByRoleId(role.getId());
         long permissionCount = role.getPermissions() != null ? role.getPermissions().size() : 0;
-        
-        return RoleResponse.builder()
+        List<PermissionResponse> permissions = role.getPermissions() != null
+                ? role.getPermissions().stream()
+                        .map(this::mapToPermissionResponse)
+                        .collect(Collectors.toList())
+                : new ArrayList<>();
+
+        return RoleResponseSimple.builder()
                 .id(role.getId())
                 .name(role.getName())
-                .permissions(new HashSet<>()) // Empty for list view
-                .users(new ArrayList<>()) // Empty for list view
                 .userCount(userCount)
                 .permissionCount(permissionCount)
-                .createdAt(role.getCreatedAt())
-                .updatedAt(role.getUpdatedAt())
+                .permissions(permissions)
                 .build();
     }
     

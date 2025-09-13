@@ -1,4 +1,4 @@
-package com.mphoola.e_empuzitsi.dto;
+package com.mphoola.e_empuzitsi.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,15 +11,15 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPermissionResponse {
+public class UserRoleResponse {
     
+    private Long id;
     private Long userId;
     private String userName;
     private String userEmail;
-    private Long permissionId;
-    private String permissionName;
+    private Long roleId;
+    private String roleName;
     private LocalDateTime assignedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private String source; // "ROLE" or "DIRECT" - indicates if permission comes from role or direct assignment
 }
