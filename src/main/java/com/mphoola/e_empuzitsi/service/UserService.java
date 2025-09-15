@@ -83,9 +83,9 @@ public class UserService {
         // Generate reset token
         String resetToken = UUID.randomUUID().toString();
         
-        // Set token and expiry (24 hours from now)
+        // Set token and expiry (1 hours from now)
         user.setResetToken(resetToken);
-        user.setResetTokenExpiresAt(LocalDateTime.now().plusHours(24));
+        user.setResetTokenExpiresAt(LocalDateTime.now().plusHours(1));
         
         userRepository.save(user);
         
@@ -113,6 +113,9 @@ public class UserService {
         user.setResetTokenExpiresAt(null);
         
         userRepository.save(user);
+        
+        // Send confirmation email asynchronously
+        emailService.sendPasswordResetConfirmationEmail(user.getEmail(), user.getName());
     }
     
     /**

@@ -50,18 +50,24 @@ public class AuthController {
     @Operation(summary = "Get Current User Profile")
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getCurrentUser() {
-        UserResponse user = userService.getCurrentUser();
-        return ApiResponse.success("Current user profile retrieved successfully", user);
+        try {
+            UserResponse user = userService.getCurrentUser();
+            return ApiResponse.success("Current user profile retrieved successfully", user);
+        } catch (Exception e) {
+            // Return normal response even if user doesn't exist
+            return ApiResponse.success("User profile request processed", null);
+        }
     }
     
     @Operation(summary = "Forgot Password")
     @PostMapping(value = "/forgot-password", consumes = "application/json")
     public ResponseEntity<Map<String, Object>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        userService.forgotPassword(request.getEmail());
-        MessageResponse messageResponse = MessageResponse.builder()
-                .message("If your email exists in our system, you will receive a password reset link shortly.")
-                .build();
-        return ApiResponse.success("Password reset request processed", messageResponse);
+        try {
+            userService.forgotPassword(request.getEmail());
+        } catch (Exception e) {
+            // Skip error, return normal response even if user doesn't exist
+        }
+        return ApiResponse.success("If your email exists in our system, you will receive a password reset link shortly.");
     }
     
     @Operation(summary = "Reset Password")
