@@ -1,5 +1,7 @@
 package com.mphoola.e_empuzitsi.dto.academic;
 
+import com.mphoola.e_empuzitsi.annotation.Unique;
+import com.mphoola.e_empuzitsi.entity.AcademicYear;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -18,6 +20,7 @@ public class AcademicYearRequest {
     @NotNull(message = "Year cannot be null")
     @Positive(message = "Year must be a positive number")
     @Schema(description = "Academic year value (e.g., 2024)", example = "2024")
+    @Unique(entity = AcademicYear.class, field = "year", message = "Academic year already exists")
     private Integer year;
     
     @Schema(description = "Whether this academic year is active", example = "true")

@@ -24,10 +24,6 @@ public class SubjectService {
     }
     
     public SubjectResponse createSubject(SubjectRequest request) {
-        if (subjectRepository.existsByName(request.getName())) {
-            throw new ResourceConflictException("Subject already exists with name: " + request.getName());
-        }
-        
         Subject subject = Subject.builder()
                 .name(request.getName())
                 .build();
