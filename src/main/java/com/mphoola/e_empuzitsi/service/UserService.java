@@ -77,7 +77,7 @@ public class UserService {
      * Generate and send password reset token
      */
     public void forgotPassword(String email) {
-        User user = userRepository.findByEmailWithRolesAndPermissions(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
         
         // Generate reset token
