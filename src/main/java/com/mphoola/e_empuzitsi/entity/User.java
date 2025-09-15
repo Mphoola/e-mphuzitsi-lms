@@ -39,6 +39,11 @@ public class User {
     @Column(nullable = false)
     private String password;
     
+    @Enumerated(EnumType.STRING)
+    @Column(name = "account_type", nullable = false)
+    @Builder.Default
+    private AccountType accountType = AccountType.STUDENT;
+    
     // Email verification fields
     @Column(name = "email_verified_at")
     private LocalDateTime emailVerifiedAt;

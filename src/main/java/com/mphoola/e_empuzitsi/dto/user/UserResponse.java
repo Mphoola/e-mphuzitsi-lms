@@ -1,5 +1,6 @@
 package com.mphoola.e_empuzitsi.dto.user;
 
+import com.mphoola.e_empuzitsi.entity.AccountType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class UserResponse {
     private Long id;
     private String name;
     private String email;
+    private AccountType accountType;
     private Set<String> roles;
     private Set<String> permissions;
     private LocalDateTime createdAt;

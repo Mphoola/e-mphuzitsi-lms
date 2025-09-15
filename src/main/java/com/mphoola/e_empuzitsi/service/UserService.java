@@ -163,6 +163,7 @@ public class UserService {
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
+                .accountType(user.getAccountType())
                 .roles(roles)
                 .permissions(allPermissions)
                 .createdAt(user.getCreatedAt())
