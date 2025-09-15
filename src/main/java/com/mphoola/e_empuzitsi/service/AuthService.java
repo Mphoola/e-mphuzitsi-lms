@@ -20,6 +20,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -58,11 +59,15 @@ public class AuthService {
             throw new ResourceConflictException("User already exists with email: " + request.getEmail());
         }
         
+        // Generate verification token
+        String verificationToken = UUID.randomUUID().toString();
+        
         // Create new user
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .verificationToken(verificationToken)
                 .build();
         
         // Save user
@@ -70,6 +75,9 @@ public class AuthService {
         
         // Assign default STUDENT role
         assignDefaultRole(savedUser);
+        
+        // Send verification email
+        userService.sendEmailVerification(savedUser.getEmail());
         
         // Generate JWT token
         String token = jwtUtil.generateToken(savedUser.getEmail());

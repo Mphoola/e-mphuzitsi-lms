@@ -39,6 +39,13 @@ public class User {
     @Column(nullable = false)
     private String password;
     
+    // Email verification fields
+    @Column(name = "email_verified_at")
+    private LocalDateTime emailVerifiedAt;
+    
+    @Column(name = "verification_token")
+    private String verificationToken;
+    
     // Password reset fields
     @Column(name = "reset_token")
     private String resetToken;
@@ -70,5 +77,15 @@ public class User {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    
+    // Helper methods for email verification
+    public boolean isEmailVerified() {
+        return emailVerifiedAt != null;
+    }
+    
+    public void markEmailAsVerified() {
+        this.emailVerifiedAt = LocalDateTime.now();
+        this.verificationToken = null;
+    }
 
 }

@@ -4,6 +4,7 @@ import com.mphoola.e_empuzitsi.dto.user.UserResponse;
 import com.mphoola.e_empuzitsi.entity.*;
 import com.mphoola.e_empuzitsi.exception.ResourceNotFoundException;
 import com.mphoola.e_empuzitsi.exception.BadCredentialsException;
+import com.mphoola.e_empuzitsi.mail.notifications.EmailVerificationEmail;
 import com.mphoola.e_empuzitsi.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -167,5 +168,64 @@ public class UserService {
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();
+    }
+    
+    /**
+     * Generate and send email verification token
+     */
+    public void sendEmailVerification(String email) {
+        User user = userRepository.findByEmailWithRolesAndPermissions(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        
+        // Generate verification token
+        String verificationToken = UUID.randomUUID().toString();
+        
+        // Set verification token
+        user.setVerificationToken(verificationToken);
+        userRepository.save(user);
+        
+        // Send verification email
+        String verificationUrl = "http://localhost:3000/auth/verify-email?token=" + verificationToken;
+        EmailVerificationEmail emailTemplate = new EmailVerificationEmail(
+            email, 
+            user.getName(), 
+            verificationToken, 
+            verificationUrl
+        );
+        emailService.sendEmail(emailTemplate);
+    }
+    
+    /**
+     * Verify email using token
+     */
+    public void verifyEmail(String token) {
+        User user = userRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new BadCredentialsException("Invalid verification token"));
+        
+        // Mark email as verified
+        user.markEmailAsVerified();
+        userRepository.save(user);
+    }
+    
+    /**
+     * Check if user's email is verified
+     */
+    public boolean isEmailVerified(String email) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        return user != null && user.isEmailVerified();
+    }
+    
+    /**
+     * Resend verification email
+     */
+    public void resendEmailVerification(String email) {
+        User user = userRepository.findByEmailWithRolesAndPermissions(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        
+        if (user.isEmailVerified()) {
+            throw new BadCredentialsException("Email is already verified");
+        }
+        
+        sendEmailVerification(email);
     }
 }

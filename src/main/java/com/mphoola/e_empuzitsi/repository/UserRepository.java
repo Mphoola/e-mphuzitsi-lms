@@ -20,6 +20,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     Optional<User> findByResetToken(String resetToken);
     
+    Optional<User> findByVerificationToken(String verificationToken);
+    
     @Query("SELECT DISTINCT u FROM User u " +
            "LEFT JOIN FETCH u.userRoles ur " +
            "LEFT JOIN FETCH ur.role r " +

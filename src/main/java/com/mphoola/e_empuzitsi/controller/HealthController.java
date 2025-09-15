@@ -1,5 +1,6 @@
 package com.mphoola.e_empuzitsi.controller;
 
+import com.mphoola.e_empuzitsi.security.AllowUnverifiedEmail;
 import com.mphoola.e_empuzitsi.util.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/health")
+@AllowUnverifiedEmail  // Health endpoints should be accessible to all
 public class HealthController {
     
     @Autowired

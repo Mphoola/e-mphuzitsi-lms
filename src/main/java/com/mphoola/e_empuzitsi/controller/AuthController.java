@@ -6,7 +6,7 @@ import com.mphoola.e_empuzitsi.dto.auth.RegisterRequest;
 import com.mphoola.e_empuzitsi.dto.user.UserResponse;
 import com.mphoola.e_empuzitsi.dto.auth.ForgotPasswordRequest;
 import com.mphoola.e_empuzitsi.dto.auth.ResetPasswordRequest;
-import com.mphoola.e_empuzitsi.dto.common.MessageResponse;
+import com.mphoola.e_empuzitsi.security.AllowUnverifiedEmail;
 import com.mphoola.e_empuzitsi.service.AuthService;
 import com.mphoola.e_empuzitsi.service.UserService;
 import com.mphoola.e_empuzitsi.util.ApiResponse;
@@ -35,6 +35,7 @@ public class AuthController {
     
     @Operation(summary = "Register New User")
     @PostMapping(value = "/register", consumes = "application/json")
+    @AllowUnverifiedEmail
     public ResponseEntity<Map<String, Object>> register(@Valid @RequestBody RegisterRequest request) {        
         AuthResponse response = authService.register(request);
         return ApiResponse.success("User registered successfully", response);
@@ -42,6 +43,7 @@ public class AuthController {
     
     @Operation(summary = "User Login")
     @PostMapping(value = "/login", consumes = "application/json")
+    @AllowUnverifiedEmail
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequest request) {        
         AuthResponse response = authService.login(request);
         return ApiResponse.success("Login successful", response);
@@ -61,6 +63,7 @@ public class AuthController {
     
     @Operation(summary = "Forgot Password")
     @PostMapping(value = "/forgot-password", consumes = "application/json")
+    @AllowUnverifiedEmail
     public ResponseEntity<Map<String, Object>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         try {
             userService.forgotPassword(request.getEmail());
@@ -72,11 +75,34 @@ public class AuthController {
     
     @Operation(summary = "Reset Password")
     @PostMapping(value = "/reset-password", consumes = "application/json")
+    @AllowUnverifiedEmail
     public ResponseEntity<Map<String, Object>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         userService.resetPassword(request.getToken(), request.getNewPassword());
-        MessageResponse messageResponse = MessageResponse.builder()
-                .message("Password has been reset successfully. You can now login with your new password.")
-                .build();
-        return ApiResponse.success("Password reset successful", messageResponse);
+        return ApiResponse.success("Password reset successful");
+    }
+    
+    @Operation(summary = "Verify Email Address")
+    @PostMapping("/verify-email")
+    @AllowUnverifiedEmail
+    public ResponseEntity<Map<String, Object>> verifyEmail(@RequestParam String token) {
+        try {
+            userService.verifyEmail(token);
+            return ApiResponse.success("Email verification successful");
+        } catch (Exception e) {
+            return ApiResponse.success("Verification request not processed");
+        }
+    }
+    
+    @Operation(summary = "Resend Verification Email")
+    @PostMapping("/resend-verification")
+    @AllowUnverifiedEmail
+    public ResponseEntity<Map<String, Object>> resendVerification(@RequestParam String email) {
+        try {
+            userService.resendEmailVerification(email);
+            
+            return ApiResponse.success("Verification email sent");
+        } catch (Exception e) {
+            return ApiResponse.success("Verification request not processed. System busy.");
+        }
     }
 }

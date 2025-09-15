@@ -1,15 +1,40 @@
 package com.mphoola.e_empuzitsi.config;
 
+import com.mphoola.e_empuzitsi.interceptor.EmailVerificationInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.concurrent.Executor;
 
 @Configuration
 @EnableAsync
-public class AsyncConfig {
+public class AsyncConfig implements WebMvcConfigurer {
+    
+    private final EmailVerificationInterceptor emailVerificationInterceptor;
+    
+    public AsyncConfig(EmailVerificationInterceptor emailVerificationInterceptor) {
+        this.emailVerificationInterceptor = emailVerificationInterceptor;
+    }
+    
+    @Override
+    public void addInterceptors(@NonNull InterceptorRegistry registry) {
+        registry.addInterceptor(emailVerificationInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns(
+                    "/api/auth/login",
+                    "/api/auth/register", 
+                    "/api/auth/forgot-password",
+                    "/api/auth/reset-password",
+                    "/api/auth/verify-email",
+                    "/api/auth/resend-verification",
+                    "/api/health/**"
+                );
+    }
 
     /**
      * Configure thread pool for async email sending
