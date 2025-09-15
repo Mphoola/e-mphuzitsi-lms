@@ -48,4 +48,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
                        "WHERE ur.role_id = :roleId",
            nativeQuery = true)
     Page<User> findByRoleId(@Param("roleId") Long roleId, Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE " +
+           "(:search IS NULL OR :search = '' OR " +
+           "LOWER(u.name) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+           "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+           "(:accountType IS NULL OR u.accountType = :accountType) AND " +
+           "(:status IS NULL OR u.status = :status)")
+    Page<User> findUsersWithFilters(@Param("search") String search,
+                                   @Param("accountType") com.mphoola.e_empuzitsi.entity.AccountType accountType,
+                                   @Param("status") com.mphoola.e_empuzitsi.entity.UserStatus status,
+                                   Pageable pageable);
 }

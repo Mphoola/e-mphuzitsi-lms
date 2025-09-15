@@ -1,11 +1,19 @@
 package com.mphoola.e_empuzitsi.service;
 
+import com.mphoola.e_empuzitsi.dto.user.UpdateUserRequest;
+import com.mphoola.e_empuzitsi.dto.user.UserRequest;
 import com.mphoola.e_empuzitsi.dto.user.UserResponse;
+import com.mphoola.e_empuzitsi.dto.user.UserResponseSimple;
 import com.mphoola.e_empuzitsi.entity.*;
+import com.mphoola.e_empuzitsi.exception.ResourceConflictException;
 import com.mphoola.e_empuzitsi.exception.ResourceNotFoundException;
 import com.mphoola.e_empuzitsi.exception.BadCredentialsException;
 import com.mphoola.e_empuzitsi.mail.notifications.EmailVerificationEmail;
+import com.mphoola.e_empuzitsi.mail.notifications.UserCredentialsEmail;
 import com.mphoola.e_empuzitsi.repository.UserRepository;
+import com.mphoola.e_empuzitsi.util.PasswordGenerator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.UUID;
@@ -24,11 +33,136 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final PasswordGenerator passwordGenerator;
     
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, EmailService emailService, PasswordGenerator passwordGenerator) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailService = emailService;
+        this.passwordGenerator = passwordGenerator;
+    }
+    
+    // ==================== CRUD OPERATIONS ====================
+    
+    /**
+     * Create a new user with auto-generated password
+     */
+    public UserResponse createUser(UserRequest request) {
+        // Check if user already exists
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ResourceConflictException("User already exists with email: " + request.getEmail());
+        }
+        
+        // Generate secure temporary password
+        String temporaryPassword = passwordGenerator.generatePassword();
+        
+        // Create new user
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(temporaryPassword))
+                .accountType(request.getAccountType() != null ? request.getAccountType() : AccountType.STUDENT)
+                .build();
+        
+        // Save user
+        User savedUser = userRepository.save(user);
+        
+        // Send credentials via email
+        try {
+            String frontendUrl = "http://localhost:3000/auth/login"; // TODO: Move to configuration
+            UserCredentialsEmail credentialsEmail = new UserCredentialsEmail(
+                savedUser.getEmail(),
+                savedUser.getName(),
+                temporaryPassword,
+                frontendUrl,
+                savedUser.getAccountType().toString()
+            );
+            emailService.sendEmail(credentialsEmail);
+        } catch (Exception e) {
+            // Log error but don't fail user creation
+            System.err.println("Failed to send credentials email: " + e.getMessage());
+        }
+        
+        // Return user response with roles and permissions
+        User userWithRoles = userRepository.findByIdWithRolesAndPermissions(savedUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found after creation"));
+        
+        return mapToUserResponse(userWithRoles);
+    }
+    
+    /**
+     * Update an existing user
+     */
+    public UserResponse updateUser(Long id, UpdateUserRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        
+        // Update user fields
+        user.setName(request.getName());
+        
+        // Update account type if provided
+        if (request.getAccountType() != null) {
+            user.setAccountType(request.getAccountType());
+        }
+        
+        // Save user
+        User savedUser = userRepository.save(user);
+        
+        // Return user response with roles and permissions
+        User userWithRoles = userRepository.findByIdWithRolesAndPermissions(savedUser.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found after update"));
+        
+        return mapToUserResponse(userWithRoles);
+    }
+    
+    /**
+     * Ban a user (soft delete)
+     */
+    public void banUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        
+        user.setStatus(UserStatus.BANNED);
+        userRepository.save(user);
+    }
+    
+    /**
+     * Unban/activate a user
+     */
+    public void unbanUser(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        
+        user.setStatus(UserStatus.ACTIVE);
+        userRepository.save(user);
+    }
+    
+    /**
+     * Check if user is active (not banned)
+     */
+    public boolean isUserActive(String email) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        return user != null && user.getStatus() == UserStatus.ACTIVE;
+    }
+    
+    /**
+     * Get all users (simple response) - Legacy method for backward compatibility
+     */
+    public List<UserResponseSimple> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        
+        return users.stream()
+                .map(this::mapToUserResponseSimple)
+                .toList();
+    }
+
+    /**
+     * Get all users with pagination, filtering, sorting, and searching
+     */
+    public Page<UserResponseSimple> getAllUsers(String search, AccountType accountType, UserStatus status, Pageable pageable) {
+        Page<User> users = userRepository.findUsersWithFilters(search, accountType, status, pageable);
+        
+        return users.map(this::mapToUserResponseSimple);
     }
     
     /**
@@ -164,10 +298,24 @@ public class UserService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .accountType(user.getAccountType())
+                .status(user.getStatus())
                 .roles(roles)
                 .permissions(allPermissions)
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .build();
+    }
+    
+    /**
+     * Map User entity to UserResponseSimple DTO
+     */
+    private UserResponseSimple mapToUserResponseSimple(User user) {
+        return UserResponseSimple.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .accountType(user.getAccountType().toString())
+                .status(user.getStatus().toString())
                 .build();
     }
     

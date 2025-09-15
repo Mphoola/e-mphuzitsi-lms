@@ -25,39 +25,39 @@ public class ActivityLogController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('list_audit_logs')") 
+    @PreAuthorize("hasAuthority('list_audit_logs')")
     public ResponseEntity<Map<String, Object>> getAllActivityLogs(
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable,
-            @RequestParam(required = false) String search,
             @RequestParam(required = false) String logName,
             @RequestParam(required = false) String event,
             @RequestParam(required = false) String subjectType,
             @RequestParam(required = false) Long subjectId,
             @RequestParam(required = false) Long causerId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @PageableDefault(page = 0, size = 10, sort = "createdAt") Pageable pageable) {
         
-        Page<ActivityLog> activityLogs = activityLogService.findAll(pageable);
-        return ApiResponse.success("Activity logs retrieved successfully", activityLogs, "/api/activity-logs");
+        Page<ActivityLog> activityLogs = activityLogService.findActivityLogsWithFilters(
+            logName, event, subjectType, subjectId, causerId, startDate, endDate, pageable);
+        return ApiResponse.success("Activity logs retrieved successfully", activityLogs);
     }
 
     @GetMapping("/recent")
     @PreAuthorize("hasAuthority('list_audit_logs')")
     public ResponseEntity<Map<String, Object>> getRecentActivityLogs(
-            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+            @PageableDefault(page = 0, size = 10, sort = "createdAt") Pageable pageable) {
         
         Page<ActivityLog> recentLogs = activityLogService.findRecentActivities(pageable);
-        return ApiResponse.success("Recent activity logs retrieved successfully", recentLogs, "/api/activity-logs/recent");
+        return ApiResponse.success("Recent activity logs retrieved successfully", recentLogs);
     }
 
     @GetMapping("/by-log-name/{logName}")
     @PreAuthorize("hasAuthority('list_audit_logs')")
     public ResponseEntity<Map<String, Object>> getActivityLogsByLogName(
             @PathVariable String logName,
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+            @PageableDefault(page = 0, size = 10, sort = "createdAt") Pageable pageable) {
         
         Page<ActivityLog> activityLogs = activityLogService.findByLogName(logName, pageable);
-        return ApiResponse.success("Activity logs by log name retrieved successfully", activityLogs, "/api/activity-logs/by-log-name/" + logName);
+        return ApiResponse.success("Activity logs by log name retrieved successfully", activityLogs);
     }
 
     @GetMapping("/by-subject/{subjectType}/{subjectId}")
@@ -65,30 +65,30 @@ public class ActivityLogController {
     public ResponseEntity<Map<String, Object>> getActivityLogsBySubject(
             @PathVariable String subjectType,
             @PathVariable Long subjectId,
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+            @PageableDefault(page = 0, size = 10, sort = "createdAt") Pageable pageable) {
         
         Page<ActivityLog> activityLogs = activityLogService.findBySubject(subjectType, subjectId, pageable);
-        return ApiResponse.success("Activity logs by subject retrieved successfully", activityLogs, "/api/activity-logs/by-subject/" + subjectType + "/" + subjectId);
+        return ApiResponse.success("Activity logs by subject retrieved successfully", activityLogs);
     }
 
     @GetMapping("/by-causer/{causerId}")
     @PreAuthorize("hasAuthority('list_user_audit_log')")
     public ResponseEntity<Map<String, Object>> getActivityLogsByCauser(
             @PathVariable Long causerId,
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+            @PageableDefault(page = 0, size = 10, sort = "createdAt") Pageable pageable) {
         
         Page<ActivityLog> activityLogs = activityLogService.findByCauser(causerId, pageable);
-        return ApiResponse.success("Activity logs by causer retrieved successfully", activityLogs, "/api/activity-logs/by-causer/" + causerId);
+        return ApiResponse.success("Activity logs by causer retrieved successfully", activityLogs);
     }
 
     @GetMapping("/by-event/{event}")
     @PreAuthorize("hasAuthority('list_audit_logs')")
     public ResponseEntity<Map<String, Object>> getActivityLogsByEvent(
             @PathVariable String event,
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+            @PageableDefault(page = 0, size = 10, sort = "createdAt") Pageable pageable) {
         
         Page<ActivityLog> activityLogs = activityLogService.findByEvent(event, pageable);
-        return ApiResponse.success("Activity logs by event retrieved successfully", activityLogs, "/api/activity-logs/by-event/" + event);
+        return ApiResponse.success("Activity logs by event retrieved successfully", activityLogs);
     }
 
     @GetMapping("/by-date-range")
@@ -96,25 +96,18 @@ public class ActivityLogController {
     public ResponseEntity<Map<String, Object>> getActivityLogsByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+            @PageableDefault(page = 0, size = 10, sort = "createdAt") Pageable pageable) {
         
         Page<ActivityLog> activityLogs = activityLogService.findByDateRange(startDate, endDate, pageable);
-        return ApiResponse.success("Activity logs by date range retrieved successfully", activityLogs, "/api/activity-logs/by-date-range");
+        return ApiResponse.success("Activity logs by date range retrieved successfully", activityLogs);
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('see_log_details')")
     public ResponseEntity<Map<String, Object>> getActivityLogById(@PathVariable Long id) {
-        ActivityLog activityLog = activityLogService.findAll(Pageable.unpaged())
-                .stream()
-                .filter(log -> log.getId().equals(id))
-                .findFirst()
-                .orElse(null);
-        
-        if (activityLog == null) {
-            return ApiResponse.notFound("Activity log not found");
-        }
-        
-        return ApiResponse.success("Activity log retrieved successfully", activityLog);
+        // Use repository directly for single entity retrieval (more efficient)
+        return activityLogService.findById(id)
+                .map(activityLog -> ApiResponse.success("Activity log retrieved successfully", activityLog))
+                .orElse(ApiResponse.notFound("Activity log not found"));
     }
 }

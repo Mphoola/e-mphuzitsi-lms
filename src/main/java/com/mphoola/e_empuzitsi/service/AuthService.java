@@ -7,6 +7,7 @@ import com.mphoola.e_empuzitsi.dto.user.UserResponse;
 import com.mphoola.e_empuzitsi.entity.Role;
 import com.mphoola.e_empuzitsi.entity.User;
 import com.mphoola.e_empuzitsi.entity.UserRole;
+import com.mphoola.e_empuzitsi.entity.UserStatus;
 import com.mphoola.e_empuzitsi.exception.ResourceConflictException;
 import com.mphoola.e_empuzitsi.exception.ResourceNotFoundException;
 import com.mphoola.e_empuzitsi.repository.RoleRepository;
@@ -99,6 +100,15 @@ public class AuthService {
      */
     public AuthResponse login(LoginRequest request) {
         try {
+            // Check if user exists and is active
+            User user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new com.mphoola.e_empuzitsi.exception.BadCredentialsException("Invalid email or password"));
+            
+            // Check if user is banned
+            if (user.getStatus() == UserStatus.BANNED) {
+                throw new com.mphoola.e_empuzitsi.exception.BadCredentialsException("Account has been banned. Please contact administrator.");
+            }
+            
             // Authenticate user
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -111,8 +121,6 @@ public class AuthService {
             String token = jwtUtil.generateToken(authentication);
             
             // Get user response with roles and permissions
-            User user = userRepository.findByEmailWithRolesAndPermissions(request.getEmail())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
             UserResponse userResponse = userService.mapToUserResponse(user);
             
             return AuthResponse.builder()

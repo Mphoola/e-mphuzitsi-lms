@@ -44,6 +44,12 @@ public class User {
     @Builder.Default
     private AccountType accountType = AccountType.STUDENT;
     
+    // User status field - determines if user can access the system
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    @Builder.Default
+    private UserStatus status = UserStatus.ACTIVE;
+    
     // Email verification fields
     @Column(name = "email_verified_at")
     private LocalDateTime emailVerifiedAt;

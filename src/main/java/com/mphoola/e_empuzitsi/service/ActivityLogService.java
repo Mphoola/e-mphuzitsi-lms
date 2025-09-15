@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -124,6 +125,23 @@ public class ActivityLogService {
     // Query methods
     public Page<ActivityLog> findAll(Pageable pageable) {
         return activityLogRepository.findAll(pageable);
+    }
+    
+    /**
+     * Find activity log by ID
+     */
+    public Optional<ActivityLog> findById(Long id) {
+        return activityLogRepository.findById(id);
+    }
+    
+    /**
+     * Find activity logs with combined filters (following UserController pattern)
+     */
+    public Page<ActivityLog> findActivityLogsWithFilters(String logName, String event, String subjectType, 
+                                                        Long subjectId, Long causerId, LocalDateTime startDate, 
+                                                        LocalDateTime endDate, Pageable pageable) {
+        return activityLogRepository.findWithFilters(logName, subjectType, subjectId, causerId, event, 
+                                                    startDate, endDate, pageable);
     }
     
     public Page<ActivityLog> findByLogName(String logName, Pageable pageable) {
