@@ -23,6 +23,8 @@ public class UserResponse {
     private UserStatus status;
     private Set<String> roles;
     private Set<String> permissions;
+    @Builder.Default
+    private boolean hasVerifiedEmail = false;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

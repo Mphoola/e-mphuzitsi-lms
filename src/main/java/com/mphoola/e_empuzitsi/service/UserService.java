@@ -301,6 +301,7 @@ public class UserService {
                 .status(user.getStatus())
                 .roles(roles)
                 .permissions(allPermissions)
+                .hasVerifiedEmail(user.isEmailVerified())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();
