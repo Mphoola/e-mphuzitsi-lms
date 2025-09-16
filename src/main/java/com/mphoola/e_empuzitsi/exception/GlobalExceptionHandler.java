@@ -258,7 +258,7 @@ public class GlobalExceptionHandler {
         
         log.warn("Resource not found for path: {} - {}", request.getRequestURI(), ex.getMessage());
         
-        return ApiResponse.failed(ex.getMessage());
+        return ApiResponse.notFound(ex.getMessage());
     }
     
     /**
@@ -271,7 +271,7 @@ public class GlobalExceptionHandler {
         
         log.warn("Resource conflict for path: {} - {}", request.getRequestURI(), ex.getMessage());
         
-        return ApiResponse.failed(ex.getMessage());
+        return ApiResponse.conflict(ex.getMessage());
     }
     
     /**
