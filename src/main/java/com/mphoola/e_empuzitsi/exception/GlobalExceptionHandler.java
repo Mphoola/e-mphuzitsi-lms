@@ -4,6 +4,7 @@ import com.mphoola.e_empuzitsi.util.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -46,7 +47,7 @@ public class GlobalExceptionHandler {
                 request.getRequestURI(), request.getMethod());
         
         String message = "HTTP method '" + request.getMethod() + "' is not supported for this endpoint";
-        return ApiResponse.failed(message);
+        return ApiResponse.error(message, HttpStatus.METHOD_NOT_ALLOWED);
     }
     
     /**
@@ -59,7 +60,7 @@ public class GlobalExceptionHandler {
         
         log.warn("Endpoint not found: {} {}", request.getMethod(), request.getRequestURI());
         
-        return ApiResponse.failed("The requested endpoint was not found");
+        return ApiResponse.notFound("The requested endpoint was not found");
     }
     
     /**
@@ -297,7 +298,7 @@ public class GlobalExceptionHandler {
         
         log.warn("Role in use for path: {} - {}", request.getRequestURI(), ex.getMessage());
         
-        return ApiResponse.failed(ex.getMessage());
+        return ApiResponse.conflict(ex.getMessage());
     }
     
     /**

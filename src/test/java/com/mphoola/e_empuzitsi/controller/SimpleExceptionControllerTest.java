@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,11 @@ class SimpleExceptionControllerTest {
         @GetMapping("/conflict")
         public String throwConflictException() {
             throw new ResourceConflictException("Test resource conflict");
+        }
+        
+        @GetMapping("/forbidden")
+        public String throwAccessDeniedException() {
+            throw new AccessDeniedException("Access denied for test endpoint");
         }
     }
 
@@ -67,6 +73,18 @@ class SimpleExceptionControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.message").value("Test resource conflict"))
+                .andExpect(jsonPath("$.errors").isEmpty())
+                .andExpect(jsonPath("$.data").isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return HTTP 403 with structured response for AccessDeniedException")
+    void shouldReturnForbiddenWithStructuredResponse() throws Exception {
+        mockMvc.perform(get("/test/forbidden")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").value("Access denied. You don't have sufficient permissions to access this resource."))
                 .andExpect(jsonPath("$.errors").isEmpty())
                 .andExpect(jsonPath("$.data").isEmpty());
     }
