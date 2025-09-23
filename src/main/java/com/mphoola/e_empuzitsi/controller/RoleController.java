@@ -1,9 +1,9 @@
 package com.mphoola.e_empuzitsi.controller;
 
+import com.mphoola.e_empuzitsi.dto.role.PermissionResponse;
 import com.mphoola.e_empuzitsi.dto.role.RoleRequest;
 import com.mphoola.e_empuzitsi.dto.role.RoleResponse;
 import com.mphoola.e_empuzitsi.dto.role.RoleResponseSimple;
-import com.mphoola.e_empuzitsi.dto.user.UserResponse;
 import com.mphoola.e_empuzitsi.dto.user.UserResponseSimple;
 import com.mphoola.e_empuzitsi.service.RoleService;
 import com.mphoola.e_empuzitsi.util.ApiResponse;
@@ -72,6 +72,14 @@ public class RoleController {
     ) {
         Page<UserResponseSimple> users = roleService.getUsersByRole(roleId, pageable);
         return ApiResponse.success("Users retrieved successfully", users);
+    }
+    
+    @GetMapping("/{roleId}/permissions")
+    @PreAuthorize("hasAuthority('show_role_details')")
+    @Operation(summary = "Get all permissions for a specific role")
+    public ResponseEntity<Map<String, Object>> getPermissionsByRole(@PathVariable Long roleId) {
+        List<PermissionResponse> permissions = roleService.getPermissionsByRole(roleId);
+        return ApiResponse.success("Permissions retrieved successfully", permissions);
     }
     
     @GetMapping

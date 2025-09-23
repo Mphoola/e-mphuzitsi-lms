@@ -122,6 +122,16 @@ public class RoleService {
         return usersPage.map(this::mapToSimpleUserResponse);
    }
     
+    @Transactional(readOnly = true)
+    public List<PermissionResponse> getPermissionsByRole(Long roleId) {
+        Role role = roleRepository.findByIdWithPermissions(roleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
+        
+        return role.getPermissions().stream()
+                .map(this::mapToPermissionResponse)
+                .collect(Collectors.toList());
+    }
+    
     private Set<Permission> validateAndFetchPermissions(Set<Long> permissionIds) {
         if (permissionIds == null || permissionIds.isEmpty()) {
             return new HashSet<>();
