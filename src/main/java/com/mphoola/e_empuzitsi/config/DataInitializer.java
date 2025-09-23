@@ -145,6 +145,7 @@ public class DataInitializer implements CommandLineRunner {
             "revoke_user_permission",
             "list_user_permissions",
             "manage_user_access",
+            "list_permissions",
             
             // Academic year management permissions
             "list_academic_years",
