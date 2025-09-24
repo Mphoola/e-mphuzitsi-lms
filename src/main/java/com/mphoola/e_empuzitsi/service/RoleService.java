@@ -41,10 +41,6 @@ public class RoleService {
     }
     
     public RoleResponse createRole(RoleRequest request) {
-        if (roleRepository.existsByName(request.getName())) {
-            throw new ResourceConflictException("Role already exists with name: " + request.getName());
-        }
-        
         Set<Permission> permissions = validateAndFetchPermissions(request.getPermissionIds());
         
         Role role = Role.builder()
@@ -115,9 +111,6 @@ public class RoleService {
 
     @Transactional(readOnly = true)
     public Page<UserResponseSimple> getUsersByRole(Long roleId, Pageable pageable) {
-        Role role = roleRepository.findById(roleId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
-
         Page<User> usersPage = userRepository.findByRoleId(roleId, pageable);
         return usersPage.map(this::mapToSimpleUserResponse);
    }

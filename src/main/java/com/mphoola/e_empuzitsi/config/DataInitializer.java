@@ -68,12 +68,10 @@ public class DataInitializer implements CommandLineRunner {
 
             // Save the user first to get the ID
             adminUser = userRepository.save(adminUser);
-            log.info("Created new admin user: {}", adminEmail);
         } else {
             // Get existing admin user
             adminUser = userRepository.findByEmail(adminEmail)
                     .orElseThrow(() -> new RuntimeException("Admin user not found"));
-            log.info("Found existing admin user: {}", adminEmail);
         }
 
         // Get the ADMIN role
@@ -100,7 +98,6 @@ public class DataInitializer implements CommandLineRunner {
 
             // Save the updated user with roles
             userRepository.save(adminUser);
-            log.info("Assigned ADMIN role to user: {}", adminEmail);
         } else {
             log.info("Admin user {} already has ADMIN role", adminEmail);
         }
@@ -235,6 +232,5 @@ public class DataInitializer implements CommandLineRunner {
         adminRole.getPermissions().addAll(allPermissions);
 
         roleRepository.save(adminRole);
-        log.info("Created/Updated ADMIN role with {} permissions", adminRole.getPermissions().size());
     }
 }

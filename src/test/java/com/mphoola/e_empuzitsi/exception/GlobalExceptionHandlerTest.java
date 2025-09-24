@@ -8,7 +8,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import java.util.Map;
 
@@ -114,6 +116,32 @@ class GlobalExceptionHandlerTest {
         Map<String, Object> body = response.getBody();
         assertNotNull(body);
         assertEquals("Role is currently in use and cannot be deleted", body.get("message"));
+        assertTrue(body.containsKey("errors"));
+        assertTrue(body.containsKey("data"));
+        assertNull(body.get("data"));
+    }
+
+    @Test
+    @DisplayName("Should return HTTP 422 with specific error message for unrecognized JSON field")
+    void handleMessageNotReadableException_ShouldReturnSpecificErrorForUnrecognizedField() {
+        // Given
+        JsonMappingException jsonException = new JsonMappingException(
+            null,
+            "Unrecognized field \"permissions\" (class com.mphoola.e_empuzitsi.dto.role.RoleRequest), not marked as ignorable"
+        );
+        HttpMessageNotReadableException exception = new HttpMessageNotReadableException("JSON parse error");
+        exception.initCause(jsonException);
+        
+        // When
+        ResponseEntity<Map<String, Object>> response = exceptionHandler.handleMessageNotReadableException(exception, request);
+        
+        // Then
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
+        assertNotNull(response.getBody());
+        
+        Map<String, Object> body = response.getBody();
+        assertNotNull(body);
+        assertEquals("Invalid JSON field in request body: \"permissions\"", body.get("message"));
         assertTrue(body.containsKey("errors"));
         assertTrue(body.containsKey("data"));
         assertNull(body.get("data"));

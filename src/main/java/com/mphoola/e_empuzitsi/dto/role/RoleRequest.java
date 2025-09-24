@@ -1,9 +1,10 @@
 package com.mphoola.e_empuzitsi.dto.role;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.mphoola.e_empuzitsi.annotation.Unique;
 import com.mphoola.e_empuzitsi.entity.Role;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class RoleRequest {
     
     @NotBlank(message = "Role name is required")
@@ -23,6 +25,6 @@ public class RoleRequest {
     @Unique(entity = Role.class, field = "name", message = "Role name already exists")
     private String name;
     
-    @NotNull(message = "Permission IDs are required")
+    @NotEmpty(message = "Permission IDs are required")
     private Set<Long> permissionIds;
 }

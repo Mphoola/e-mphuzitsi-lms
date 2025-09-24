@@ -82,12 +82,34 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, Object>> handleMessageNotReadableException(
-            HttpMessageNotReadableException ex, 
+            HttpMessageNotReadableException ex,
             HttpServletRequest request) {
-        
+
         log.warn("Malformed request body for path: {} - {}", request.getRequestURI(), ex.getMessage());
-        
-        return ApiResponse.unprocessable("Invalid request body. Please check your JSON format");
+
+        String errorMessage = "Invalid request body. Please check your JSON format";
+
+        // Extract more specific error details from Jackson exceptions
+        Throwable cause = ex.getCause();
+        if (cause != null) {
+            String causeMessage = cause.getMessage();
+            if (causeMessage != null) {
+                // Handle unrecognized field errors
+                if (causeMessage.contains("Unrecognized field")) {
+                    errorMessage = "Invalid JSON field in request body: " + causeMessage.substring(causeMessage.indexOf("\""), causeMessage.lastIndexOf("\"") + 1);
+                }
+                // Handle other Jackson parsing errors
+                else if (causeMessage.contains("Cannot deserialize")) {
+                    errorMessage = "Invalid data type in request body. " + causeMessage;
+                }
+                // Handle missing required fields
+                else if (causeMessage.contains("Missing required")) {
+                    errorMessage = causeMessage;
+                }
+            }
+        }
+
+        return ApiResponse.unprocessable(errorMessage);
     }
     
     /**
