@@ -1,5 +1,6 @@
 package com.mphoola.e_empuzitsi.config;
 
+import com.mphoola.e_empuzitsi.entity.AccountType;
 import com.mphoola.e_empuzitsi.entity.Permission;
 import com.mphoola.e_empuzitsi.entity.Role;
 import com.mphoola.e_empuzitsi.entity.User;
@@ -61,8 +62,9 @@ public class DataInitializer implements CommandLineRunner {
         // Check if the admin user already exists
         if (!userRepository.existsByEmail(adminEmail)) {
             adminUser = User.builder()
-                    .name("Admin User")
+                    .name("Promise")
                     .email(adminEmail)
+                    .accountType(AccountType.ADMIN)
                     .password(passwordEncoder.encode(adminPassword))
                     .build();
 

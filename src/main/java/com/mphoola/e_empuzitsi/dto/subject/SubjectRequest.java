@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SubjectRequest {
     
-        @NotBlank(message = "Subject name is required")
+    @NotBlank(message = "Subject name is required")
     @Size(min = 2, max = 100, message = "Subject name must be between 2 and 100 characters")
     @Unique(entity = Subject.class, field = "name", message = "Subject name already exists")
     private String name;
