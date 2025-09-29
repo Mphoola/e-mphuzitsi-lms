@@ -65,6 +65,7 @@ public class DataInitializer implements CommandLineRunner {
                     .name("Promise")
                     .email(adminEmail)
                     .accountType(AccountType.ADMIN)
+                    .emailVerifiedAt(java.time.LocalDateTime.now())
                     .password(passwordEncoder.encode(adminPassword))
                     .build();
 
