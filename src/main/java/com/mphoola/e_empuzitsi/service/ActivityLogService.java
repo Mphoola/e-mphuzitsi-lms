@@ -144,30 +144,6 @@ public class ActivityLogService {
                                                     startDate, endDate, pageable);
     }
     
-    public Page<ActivityLog> findByLogName(String logName, Pageable pageable) {
-        return activityLogRepository.findByLogName(logName, pageable);
-    }
-    
-    public Page<ActivityLog> findBySubject(String subjectType, Long subjectId, Pageable pageable) {
-        return activityLogRepository.findBySubjectTypeAndSubjectId(subjectType, subjectId, pageable);
-    }
-    
-    public Page<ActivityLog> findByCauser(Long causerId, Pageable pageable) {
-        return activityLogRepository.findByCauserTypeAndCauserId("User", causerId, pageable);
-    }
-    
-    public Page<ActivityLog> findByEvent(String event, Pageable pageable) {
-        return activityLogRepository.findByEvent(event, pageable);
-    }
-    
-    public Page<ActivityLog> findByDateRange(LocalDateTime start, LocalDateTime end, Pageable pageable) {
-        return activityLogRepository.findByCreatedAtBetween(start, end, pageable);
-    }
-    
-    public Page<ActivityLog> findRecentActivities(Pageable pageable) {
-        return activityLogRepository.findRecentActivities(pageable);
-    }
-    
     /**
      * Convert object to JsonNode for properties storage
      */

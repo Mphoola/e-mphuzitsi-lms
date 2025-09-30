@@ -80,7 +80,7 @@ public class ActivityLogServiceTest {
         });
 
         // Then - both activities should have the same batch UUID
-        Page<ActivityLog> logs = activityLogRepository.findByLogName("batch_test", PageRequest.of(0, 10));
+        Page<ActivityLog> logs = activityLogService.findActivityLogsWithFilters("batch_test", null, null, null, null, null, null, PageRequest.of(0, 10));
         assertThat(logs.getContent()).hasSize(2);
         
         String batchUuid = logs.getContent().get(0).getBatchUuid();
@@ -96,8 +96,8 @@ public class ActivityLogServiceTest {
         activityLogService.log("user", "Another user activity");
 
         // When
-        Page<ActivityLog> userLogs = activityLogService.findByLogName("user", PageRequest.of(0, 10));
-        Page<ActivityLog> systemLogs = activityLogService.findByLogName("system", PageRequest.of(0, 10));
+        Page<ActivityLog> userLogs = activityLogService.findActivityLogsWithFilters("user", null, null, null, null, null, null, PageRequest.of(0, 10));
+        Page<ActivityLog> systemLogs = activityLogService.findActivityLogsWithFilters("system", null, null, null, null, null, null, PageRequest.of(0, 10));
 
         // Then
         assertThat(userLogs.getContent()).hasSize(2);
@@ -126,7 +126,7 @@ public class ActivityLogServiceTest {
         assertThat(finalCount).isEqualTo(initialCount + 1);
 
         // Find the created log
-        Page<ActivityLog> recentLogs = activityLogService.findRecentActivities(PageRequest.of(0, 1));
+        Page<ActivityLog> recentLogs = activityLogService.findActivityLogsWithFilters(null, null, null, null, null, null, null, PageRequest.of(0, 1));
         assertThat(recentLogs.getContent()).hasSize(1);
         
         ActivityLog log = recentLogs.getContent().get(0);
