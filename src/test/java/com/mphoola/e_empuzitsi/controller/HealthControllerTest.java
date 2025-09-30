@@ -33,7 +33,8 @@ public class HealthControllerTest {
         // When & Then
         mockMvc.perform(get("/api/health/simple"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Application is running!"));
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.message").value("Application is running!"));
     }
 
     @Test
@@ -44,9 +45,9 @@ public class HealthControllerTest {
         mockMvc.perform(get("/api/health"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.status").value("UP"))
-                .andExpect(jsonPath("$.message").value("Application is running!"))
-                .andExpect(jsonPath("$.timestamp").exists());
+                .andExpect(jsonPath("$.data.status").value("UP"))
+                .andExpect(jsonPath("$.data.message").value("Application is running!"))
+                .andExpect(jsonPath("$.data.timestamp").exists());
     }
 
     @Test
@@ -57,8 +58,8 @@ public class HealthControllerTest {
         mockMvc.perform(get("/api/health/check"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.status").value("UP"))
-                .andExpect(jsonPath("$.database").exists())
-                .andExpect(jsonPath("$.timestamp").exists());
+                .andExpect(jsonPath("$.data.status").value("UP"))
+                .andExpect(jsonPath("$.data.database").exists())
+                .andExpect(jsonPath("$.data.timestamp").exists());
     }
 }

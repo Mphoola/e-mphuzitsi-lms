@@ -27,26 +27,16 @@ public class ActivityLogController {
     @GetMapping
     @PreAuthorize("hasAuthority('list_audit_logs')")
     public ResponseEntity<Map<String, Object>> getAllActivityLogs(
-            @RequestParam(required = false) String logName,
             @RequestParam(required = false) String event,
             @RequestParam(required = false) String subjectType,
             @RequestParam(required = false) Long subjectId,
             @RequestParam(required = false) Long causerId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
-            @PageableDefault(page = 0, size = 10, sort = "createdAt") Pageable pageable) {
-        
-        Page<ActivityLog> activityLogs = activityLogService.findActivityLogsWithFilters(
-            logName, event, subjectType, subjectId, causerId, startDate, endDate, pageable);
-        return ApiResponse.success("Activity logs retrieved successfully", activityLogs);
-    }
+            @PageableDefault(page = 0, size = 10, sort = "createdAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable) {
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('see_log_details')")
-    public ResponseEntity<Map<String, Object>> getActivityLogById(@PathVariable Long id) {
-        // Use repository directly for single entity retrieval (more efficient)
-        return activityLogService.findById(id)
-                .map(activityLog -> ApiResponse.success("Activity log retrieved successfully", activityLog))
-                .orElse(ApiResponse.notFound("Activity log not found"));
+        Page<ActivityLog> activityLogs = activityLogService.findActivityLogsWithFilters(
+            event, subjectType, subjectId, causerId, startDate, endDate, pageable);
+        return ApiResponse.success("Activity logs retrieved successfully", activityLogs);
     }
 }

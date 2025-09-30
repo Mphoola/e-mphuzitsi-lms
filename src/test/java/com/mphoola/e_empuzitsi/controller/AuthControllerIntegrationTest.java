@@ -46,9 +46,9 @@ class AuthControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.user.name").value("John Doe"))
-                .andExpect(jsonPath("$.user.email").value("john.doe@example.com"));
+                .andExpect(jsonPath("$.data.token").exists())
+                .andExpect(jsonPath("$.data.user.name").value("John Doe"))
+                .andExpect(jsonPath("$.data.user.email").value("john.doe@example.com"));
     }
 
     @Test
@@ -72,8 +72,8 @@ class AuthControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.token").isNotEmpty())
-                .andExpect(jsonPath("$.user.email").value("login.test@example.com"));
+                .andExpect(jsonPath("$.data.token").isNotEmpty())
+                .andExpect(jsonPath("$.data.user.email").value("login.test@example.com"));
     }
 
     @Test
@@ -91,7 +91,7 @@ class AuthControllerIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.email").value("current.user@example.com"))
-                .andExpect(jsonPath("$.name").value("Current User"));
+                .andExpect(jsonPath("$.data.email").value("current.user@example.com"))
+                .andExpect(jsonPath("$.data.name").value("Current User"));
     }
 }

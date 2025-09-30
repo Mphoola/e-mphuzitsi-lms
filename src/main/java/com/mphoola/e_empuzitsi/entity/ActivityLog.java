@@ -26,9 +26,6 @@ public class ActivityLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "log_name", nullable = false)
-    private String logName;
-    
     @Column(name = "description", nullable = false, length = 500)
     private String description;
     
@@ -50,9 +47,6 @@ public class ActivityLog {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "properties", columnDefinition = "json")
     private JsonNode properties;
-    
-    @Column(name = "batch_uuid")
-    private String batchUuid;
     
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -76,7 +76,6 @@ public class UserAccessManagementService {
 
         // Log the activity
         ActivityLogService.ActivityLogBuilder.create(activityLogService)
-                .logName("user_role_assigned")
                 .description(String.format("Role '%s' assigned to user '%s'", role.getName(), user.getName()))
                 .on(user)
                 .withProperties(java.util.Map.of(
@@ -107,7 +106,6 @@ public class UserAccessManagementService {
 
         // Log the activity
         ActivityLogService.ActivityLogBuilder.create(activityLogService)
-                .logName("user_role_revoked")
                 .description(String.format("Role '%s' revoked from user '%s'", role.getName(), user.getName()))
                 .on(user)
                 .withProperties(java.util.Map.of(
@@ -150,7 +148,6 @@ public class UserAccessManagementService {
 
         // Log the activity
         ActivityLogService.ActivityLogBuilder.create(activityLogService)
-                .logName("user_permission_assigned")
                 .description(String.format("Permission '%s' assigned directly to user '%s'", permission.getName(), user.getName()))
                 .on(user)
                 .withProperties(java.util.Map.of(
@@ -174,7 +171,6 @@ public class UserAccessManagementService {
 
         // Log the activity
         ActivityLogService.ActivityLogBuilder.create(activityLogService)
-                .logName("user_permission_revoked")
                 .description(String.format("Permission '%s' revoked from user '%s'", permission.getName(), user.getName()))
                 .on(user)
                 .withProperties(java.util.Map.of(

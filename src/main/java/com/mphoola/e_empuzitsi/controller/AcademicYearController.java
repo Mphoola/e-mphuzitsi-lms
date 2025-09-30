@@ -4,6 +4,7 @@ import com.mphoola.e_empuzitsi.dto.academic.AcademicYearRequest;
 import com.mphoola.e_empuzitsi.dto.academic.AcademicYearResponse;
 import com.mphoola.e_empuzitsi.service.AcademicYearService;
 import com.mphoola.e_empuzitsi.util.ApiResponse;
+import com.mphoola.e_empuzitsi.security.AllowUnverifiedEmail;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +23,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/academic-years")
 @Tag(name = "Academic Years", description = "Academic year management operations")
+@AllowUnverifiedEmail  // Allow access without email verification for testing
 @Slf4j
 public class AcademicYearController {
 

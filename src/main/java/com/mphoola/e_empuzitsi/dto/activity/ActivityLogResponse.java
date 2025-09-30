@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 public class ActivityLogResponse {
     
     private Long id;
-    private String logName;
     private String description;
     private String subjectType;
     private Long subjectId;
@@ -23,7 +22,6 @@ public class ActivityLogResponse {
     private String causerType;
     private Long causerId;
     private JsonNode properties;
-    private String batchUuid;
     private LocalDateTime createdAt;
     
     // Additional computed fields

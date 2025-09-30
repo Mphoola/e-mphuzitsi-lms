@@ -14,12 +14,6 @@ import java.lang.annotation.Target;
 public @interface Loggable {
     
     /**
-     * The log name to use for this entity
-     * Defaults to "default"
-     */
-    String logName() default "default";
-    
-    /**
      * Whether to log create events
      */
     boolean logCreate() default true;

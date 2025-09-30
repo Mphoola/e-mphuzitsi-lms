@@ -99,7 +99,6 @@ public class AcademicYearService {
         
         // Log activity
         ActivityLogService.ActivityLogBuilder.create(activityLogService)
-                .logName("academic_year_created")
                 .description("Created academic year " + savedAcademicYear.getYear())
                 .event("academic_year_created")
                 .on(savedAcademicYear)
@@ -136,7 +135,6 @@ public class AcademicYearService {
         
         // Log activity
         ActivityLogService.ActivityLogBuilder.create(activityLogService)
-                .logName("academic_year_updated")
                 .description("Updated academic year from " + oldYear + " to " + updatedAcademicYear.getYear())
                 .event("academic_year_updated")
                 .on(updatedAcademicYear)
@@ -167,7 +165,6 @@ public class AcademicYearService {
         // Log activity
         String action = updatedAcademicYear.getIsActive() ? "activated" : "deactivated";
         ActivityLogService.ActivityLogBuilder.create(activityLogService)
-                .logName("academic_year_" + action)
                 .description("Academic year " + updatedAcademicYear.getYear() + " " + action)
                 .event("academic_year_" + action)
                 .on(updatedAcademicYear)
@@ -200,7 +197,6 @@ public class AcademicYearService {
         
         // Log activity
         ActivityLogService.ActivityLogBuilder.create(activityLogService)
-                .logName("academic_year_deleted")
                 .description("Deleted academic year " + year)
                 .event("academic_year_deleted")
                 .withProperty("year", year)

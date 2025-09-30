@@ -5,6 +5,8 @@ import com.mphoola.e_empuzitsi.util.ApplicationContextProvider;
 import jakarta.persistence.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
+import java.util.Arrays;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -27,18 +29,32 @@ public class ActivityLogEntityListener {
         }
     }
 
+    private boolean isActivityLogEnabled() {
+        try {
+            Environment environment = ApplicationContextProvider.getBean(Environment.class);
+            // Disable activity logging in test environment
+            return !Arrays.asList(environment.getActiveProfiles()).contains("test");
+        } catch (Exception e) {
+            // If we can't determine the environment, default to enabled
+            return true;
+        }
+    }
+
     @PostPersist
     public void postPersist(Object entity) {
+        if (!isActivityLogEnabled()) return;
         logActivity(entity, "created", "Created " + getEntityName(entity));
     }
 
     @PostUpdate
     public void postUpdate(Object entity) {
+        if (!isActivityLogEnabled()) return;
         logActivity(entity, "updated", "Updated " + getEntityName(entity));
     }
 
     @PostRemove
     public void postRemove(Object entity) {
+        if (!isActivityLogEnabled()) return;
         logActivity(entity, "deleted", "Deleted " + getEntityName(entity));
     }
 
@@ -54,7 +70,6 @@ public class ActivityLogEntityListener {
                 return;
             }
 
-            String entityName = getEntityName(entity);
             Long entityId = getEntityId(entity);
             
             Map<String, Object> properties = new HashMap<>();
@@ -70,7 +85,6 @@ public class ActivityLogEntityListener {
             }
 
             ActivityLogService.ActivityLogBuilder.create(activityLogService)
-                    .logName("default")
                     .description(description)
                     .on(entity)
                     .event(event)

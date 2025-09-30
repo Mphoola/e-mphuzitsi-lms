@@ -18,7 +18,7 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 @EntityListeners({AuditingEntityListener.class, ActivityLogEntityListener.class})
-@Loggable(logName = "user", excludeFields = {"password", "resetToken"})
+@Loggable(excludeFields = {"password", "resetToken"})
 @Getter
 @Setter
 @NoArgsConstructor

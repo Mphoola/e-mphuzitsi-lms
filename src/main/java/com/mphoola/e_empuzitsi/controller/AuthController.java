@@ -51,6 +51,7 @@ public class AuthController {
     
     @Operation(summary = "Get Current User Profile")
     @GetMapping("/me")
+    @AllowUnverifiedEmail
     public ResponseEntity<Map<String, Object>> getCurrentUser() {
         try {
             UserResponse user = userService.getCurrentUser();

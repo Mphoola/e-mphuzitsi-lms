@@ -7,7 +7,9 @@ import com.mphoola.e_empuzitsi.service.AcademicYearService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,7 +28,9 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(AcademicYearController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 class AcademicYearControllerTest {
 
     @Autowired
@@ -70,8 +74,8 @@ class AcademicYearControllerTest {
                         .param("page", "0")
                         .param("size", "20"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].year").value(2024))
-                .andExpect(jsonPath("$.content[0].isActive").value(true));
+                .andExpect(jsonPath("$.data.data[0].year").value(2024))
+                .andExpect(jsonPath("$.data.data[0].isActive").value(true));
 
         verify(academicYearService).getAllAcademicYears(any());
     }
@@ -89,8 +93,8 @@ class AcademicYearControllerTest {
                         .param("page", "0")
                         .param("size", "20"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].year").value(2024))
-                .andExpect(jsonPath("$.content[0].isActive").value(true));
+                .andExpect(jsonPath("$.data.data[0].year").value(2024))
+                .andExpect(jsonPath("$.data.data[0].isActive").value(true));
 
         verify(academicYearService).getAcademicYearsByStatus(eq(true), any());
     }
@@ -110,8 +114,8 @@ class AcademicYearControllerTest {
         // When & Then
         mockMvc.perform(get("/api/academic-years/list"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].year").value(2024))
-                .andExpect(jsonPath("$[0].isActive").value(true));
+                .andExpect(jsonPath("$.data[0].year").value(2024))
+                .andExpect(jsonPath("$.data[0].isActive").value(true));
 
         verify(academicYearService).getAllAcademicYearsNoPagination();
     }
@@ -125,9 +129,9 @@ class AcademicYearControllerTest {
         // When & Then
         mockMvc.perform(get("/api/academic-years/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.year").value(2024))
-                .andExpect(jsonPath("$.isActive").value(true));
+                .andExpect(jsonPath("$.data.id").value(1L))
+                .andExpect(jsonPath("$.data.year").value(2024))
+                .andExpect(jsonPath("$.data.isActive").value(true));
 
         verify(academicYearService).getAcademicYearById(1L);
     }
@@ -147,9 +151,9 @@ class AcademicYearControllerTest {
         // When & Then
         mockMvc.perform(get("/api/academic-years/stats"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalAcademicYears").value(10L))
-                .andExpect(jsonPath("$.activeAcademicYears").value(7L))
-                .andExpect(jsonPath("$.inactiveAcademicYears").value(3L));
+                .andExpect(jsonPath("$.data.totalAcademicYears").value(10L))
+                .andExpect(jsonPath("$.data.activeAcademicYears").value(7L))
+                .andExpect(jsonPath("$.data.inactiveAcademicYears").value(3L));
 
         verify(academicYearService).getAcademicYearStats();
     }
@@ -167,8 +171,8 @@ class AcademicYearControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(academicYearRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.year").value(2024))
-                .andExpect(jsonPath("$.isActive").value(true));
+                .andExpect(jsonPath("$.data.year").value(2024))
+                .andExpect(jsonPath("$.data.isActive").value(true));
 
         verify(academicYearService).createAcademicYear(any(AcademicYearRequest.class));
     }
@@ -186,7 +190,7 @@ class AcademicYearControllerTest {
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(invalidRequest)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnprocessableEntity());
     }
 
     @Test
@@ -211,8 +215,8 @@ class AcademicYearControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(academicYearRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.year").value(2024))
-                .andExpect(jsonPath("$.isActive").value(true));
+                .andExpect(jsonPath("$.data.year").value(2024))
+                .andExpect(jsonPath("$.data.isActive").value(true));
 
         verify(academicYearService).updateAcademicYear(eq(1L), any(AcademicYearRequest.class));
     }
@@ -244,7 +248,7 @@ class AcademicYearControllerTest {
         mockMvc.perform(patch("/api/academic-years/1/toggle-status")
                         .with(csrf()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isActive").value(false));
+                .andExpect(jsonPath("$.data.isActive").value(false));
 
         verify(academicYearService).toggleAcademicYearStatus(1L);
     }
@@ -262,7 +266,7 @@ class AcademicYearControllerTest {
         // When & Then
         mockMvc.perform(delete("/api/academic-years/1")
                         .with(csrf()))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         verify(academicYearService).deleteAcademicYear(1L);
     }

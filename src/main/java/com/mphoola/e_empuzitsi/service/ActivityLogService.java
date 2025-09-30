@@ -16,8 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Objects;
 
 @Service
 public class ActivityLogService {
@@ -27,9 +26,6 @@ public class ActivityLogService {
     private final ActivityLogRepository activityLogRepository;
     private final ObjectMapper objectMapper;
     
-    // Thread-local storage for batch operations
-    private static final ThreadLocal<String> currentBatchUuid = new ThreadLocal<>();
-    
     public ActivityLogService(ActivityLogRepository activityLogRepository, ObjectMapper objectMapper) {
         this.activityLogRepository = activityLogRepository;
         this.objectMapper = objectMapper;
@@ -38,46 +34,18 @@ public class ActivityLogService {
     /**
      * Log an activity with minimal parameters
      */
-    public ActivityLog log(String logName) {
-        return log(logName, null);
+    public ActivityLog log(String description) {
+        return log(description, null);
     }
     
     /**
      * Log an activity with description
      */
-    public ActivityLog log(String logName, String description) {
+    public ActivityLog log(String description, String event) {
         return ActivityLogBuilder.create(this)
-                .logName(logName)
-                .description(description != null ? description : logName)
+                .description(description)
+                .event(event != null ? event : "default")
                 .log();
-    }
-    
-    /**
-     * Start a batch operation - all subsequent logs will share the same batch UUID
-     */
-    public String startBatch() {
-        String batchUuid = UUID.randomUUID().toString();
-        currentBatchUuid.set(batchUuid);
-        return batchUuid;
-    }
-    
-    /**
-     * End the current batch operation
-     */
-    public void endBatch() {
-        currentBatchUuid.remove();
-    }
-    
-    /**
-     * Execute a block of code within a batch
-     */
-    public void withBatch(Runnable action) {
-        startBatch();
-        try {
-            action.run();
-        } finally {
-            endBatch();
-        }
     }
     
     /**
@@ -85,12 +53,6 @@ public class ActivityLogService {
      */
     public ActivityLog saveActivityLog(ActivityLog activityLog) {
         try {
-            // Set batch UUID if we're in a batch operation
-            String batchUuid = currentBatchUuid.get();
-            if (batchUuid != null) {
-                activityLog.setBatchUuid(batchUuid);
-            }
-            
             // Set causer from security context if not already set
             if (activityLog.getCauserId() == null) {
                 User currentUser = getCurrentUser();
@@ -128,19 +90,12 @@ public class ActivityLogService {
     }
     
     /**
-     * Find activity log by ID
-     */
-    public Optional<ActivityLog> findById(Long id) {
-        return activityLogRepository.findById(id);
-    }
-    
-    /**
      * Find activity logs with combined filters (following UserController pattern)
      */
-    public Page<ActivityLog> findActivityLogsWithFilters(String logName, String event, String subjectType, 
+    public Page<ActivityLog> findActivityLogsWithFilters(String event, String subjectType, 
                                                         Long subjectId, Long causerId, LocalDateTime startDate, 
                                                         LocalDateTime endDate, Pageable pageable) {
-        return activityLogRepository.findWithFilters(logName, subjectType, subjectId, causerId, event, 
+        return activityLogRepository.findWithFilters(subjectType, subjectId, causerId, event, 
                                                     startDate, endDate, pageable);
     }
     
@@ -157,15 +112,55 @@ public class ActivityLogService {
     }
     
     /**
-     * Create properties map with old and new values
+     * Create properties map with old and new values for updates, with field skipping
      */
-    public Map<String, Object> createChangeProperties(Object oldValues, Object newValues) {
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> createChangeProperties(Object oldValues, Object newValues, String... skipFields) {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("attributes", newValues);
-        if (oldValues != null) {
-            properties.put("old", oldValues);
+        
+        if (oldValues != null && newValues != null) {
+            // For updates, compare old and new values and only log changes
+            Map<String, Object> oldMap = filterFields((Map<String, Object>) objectMapper.convertValue(oldValues, Map.class), skipFields);
+            Map<String, Object> newMap = filterFields((Map<String, Object>) objectMapper.convertValue(newValues, Map.class), skipFields);
+            
+            // Only include fields that actually changed
+            Map<String, Object> oldChanges = new HashMap<>();
+            Map<String, Object> newChanges = new HashMap<>();
+            
+            for (String key : newMap.keySet()) {
+                Object oldValue = oldMap.get(key);
+                Object newValue = newMap.get(key);
+                if (!Objects.equals(oldValue, newValue)) {
+                    oldChanges.put(key, oldValue);
+                    newChanges.put(key, newValue);
+                }
+            }
+            
+            if (!oldChanges.isEmpty() || !newChanges.isEmpty()) {
+                properties.put("old", oldChanges);
+                properties.put("new", newChanges);
+            }
+        } else if (newValues != null) {
+            // For creation, just include the new values (filtered)
+            properties.put("attributes", filterFields((Map<String, Object>) objectMapper.convertValue(newValues, Map.class), skipFields));
         }
+        
         return properties;
+    }
+    
+    /**
+     * Filter out fields that should be skipped from logging
+     */
+    private Map<String, Object> filterFields(Map<String, Object> data, String... skipFields) {
+        if (skipFields == null || skipFields.length == 0) {
+            return data;
+        }
+        
+        Map<String, Object> filtered = new HashMap<>(data);
+        for (String field : skipFields) {
+            filtered.remove(field);
+        }
+        return filtered;
     }
     
     /**
@@ -182,11 +177,6 @@ public class ActivityLogService {
         
         public static ActivityLogBuilder create(ActivityLogService service) {
             return new ActivityLogBuilder(service);
-        }
-        
-        public ActivityLogBuilder logName(String logName) {
-            activityLog.setLogName(logName);
-            return this;
         }
         
         public ActivityLogBuilder description(String description) {
@@ -241,7 +231,7 @@ public class ActivityLogService {
         public ActivityLog log() {
             // Set default description if not provided
             if (activityLog.getDescription() == null) {
-                activityLog.setDescription(activityLog.getLogName());
+                activityLog.setDescription("Activity logged");
             }
             
             return service.saveActivityLog(activityLog);
